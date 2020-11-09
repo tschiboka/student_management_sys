@@ -47,7 +47,8 @@ students = [
 
 # App State
 state = {
-    "menu_open": None
+    "menu_open": None,
+    "update": []
 }
 
 
@@ -122,11 +123,6 @@ class MainButton(tk.Button):
         )
 
 
-def setState(newState):
-    state["menu_open"] = newState
-    print(state)
-
-
 for index, btn_name in enumerate(BUTTONS[:-1]):
     btn = MainButton(
         sidebar,
@@ -153,59 +149,100 @@ capture = tk.Frame(display, height=20, width=1050)
 capture.grid(row=0, column=0)
 capture.grid_propagate(False)
 
-for index, c_name in enumerate(CAPTION_NAMES):
-    cap = tk.Label(
-        capture,
-        text=c_name,
-        background="#bbbbbb",
-        relief="ridge",
-        borderwidth=1,
-        width=30)
-    cap.grid(row=0, column=index)
-    cap.grid_propagate(False)
-    capture.grid_columnconfigure(index, weight=1)
-
-# TABLE
 table_container = tk.Frame(display, height=400, width=1050)
-table_container.grid(row=1, column=0)
-table_container.grid_propagate(False)
-table_container.grid_columnconfigure(0, weight=0)
-table_container.grid_rowconfigure(0, weight=0)
 
-list_to_display = students
-if len(list_to_display):
-    for row_index, student in enumerate(students):
-        row = tk.Frame(table_container, width=1050, height=20)
 
-        for index, entry in enumerate(student):
-            col = tk.Label(
-                row,
-                text=entry,
-                relief="sunken",
-                borderwidth=1,
-                width=30)
-            col.grid(row=0, column=index)
-            col.grid_propagate(False)
-            row.grid_columnconfigure(index, weight=1)
+def createTable(table_container):
+    print("Here", students[0])
+    for index, c_name in enumerate(CAPTION_NAMES):
+        cap = tk.Label(
+            capture,
+            text=c_name,
+            background="#bbbbbb",
+            relief="ridge",
+            borderwidth=1,
+            width=30)
+        cap.grid(row=0, column=index)
+        cap.grid_propagate(False)
+        capture.grid_columnconfigure(index, weight=1)
 
-        row.grid(row=row_index, column=0)
-        row.grid_propagate(False)
-        table_container.grid_columnconfigure(index, weight=1)
-else:
-    no_item = tk.Label(
-        table_container,
-        text="No Item Found!",
-        width=150,
-        height=30)
-    no_item.grid(row=0, column=0)
-    no_item.grid_propagate(False)
-    table_container.grid_columnconfigure(0, weight=1)
-    table_container.grid_rowconfigure(0, weight=1)
+    # TABLE
+    table_container.grid(row=1, column=0)
+    table_container.grid_propagate(False)
+    table_container.grid_columnconfigure(0, weight=0)
+    table_container.grid_rowconfigure(0, weight=0)
+
+    list_to_display = students
+
+    if len(list_to_display):
+        for row_index, student in enumerate(students):
+            row = tk.Frame(table_container, width=1050, height=20)
+
+            for index, entry in enumerate(student):
+                col = tk.Label(
+                    row,
+                    text=entry,
+                    relief="sunken",
+                    borderwidth=1,
+                    width=30)
+                col.grid(row=0, column=index)
+                col.grid_propagate(False)
+                row.grid_columnconfigure(index, weight=1)
+
+            row.grid(row=row_index, column=0)
+            row.grid_propagate(False)
+            table_container.grid_columnconfigure(index, weight=1)
+    else:
+        no_item = tk.Label(
+            table_container,
+            text="No Item Found!",
+            width=150,
+            height=30)
+        no_item.grid(row=0, column=0)
+        no_item.grid_propagate(False)
+        table_container.grid_columnconfigure(0, weight=1)
+        table_container.grid_rowconfigure(0, weight=1)
+
+    def monitorState():
+        if "table" in state["update"]:
+            state["update"].remove("table")
+            print(state["update"])
+            table_container.destroy()
+            updated_table_container = tk.Frame(display, height=400, width=1050)
+            createTable(updated_table_container)
+
+        window.after(100, monitorState)
+
+    monitorState()
+
+
+createTable(table_container)
+
 
 # FOOTER
 footer = tk.Frame(display, height=32, width=1050, bg=PRIMARY_BG)
 footer.grid(row=2, column=0)
 footer.grid_propagate(False)
+
+
+# SEARCH WINDOW
+if state["menu_open"]:
+    print(state["menu_open"])
+    search_win = tk.Frame(window, background=PRIMARY_BG)
+    search_win.place(
+        bordermode=tk.INSIDE,
+        height=100,
+        width=500,
+        relx=0.5,
+        rely=0.5,
+        anchor=tk.CENTER)
+    label = tk.Label(search_win, text="", background="red")
+    label.grid(row=0, column=0)
+
+
+def setState(new_state):
+    state["menu_open"] = new_state
+    state["update"].append("table")
 
 
 window.mainloop()
