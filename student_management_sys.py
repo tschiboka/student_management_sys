@@ -46,8 +46,8 @@ students = [
 ]
 
 # App State
-app_state = {
-
+state = {
+    "menu_open": None
 }
 
 
@@ -122,11 +122,19 @@ class MainButton(tk.Button):
         )
 
 
+def setState(newState):
+    state["menu_open"] = newState
+    print(state)
+
+
 for index, btn_name in enumerate(BUTTONS[:-1]):
-    btn = MainButton(sidebar, text=btn_name)
+    btn = MainButton(
+        sidebar,
+        text=btn_name,
+        command=lambda new_state=btn_name: setState(new_state))
     btn.grid(row=index, column=0)
 
-exit_btn = MainButton(sidebar, text=BUTTONS[-1])
+exit_btn = MainButton(sidebar, text=BUTTONS[-1], command=window.destroy)
 exit_btn.grid(row=len(BUTTONS), column=0, sticky="s")
 sidebar.grid_rowconfigure(len(BUTTONS), weight=1)
 
