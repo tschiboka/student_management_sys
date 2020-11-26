@@ -1,3 +1,18 @@
+# ------------------------- Student Management system --------------------------
+# -                        Developed by: Tivadar Debnar                        -
+# -                                                                            -
+# -         Implementing Event driven paradigm; by listening app state.        -
+# -           Function Paradigm: events calling main functionalities           -
+# -             Object Oriented Paradigm: creating MainButton class            -
+# ------------------------------------------------------------------------------
+
+
+# ------------------------------ Imports and State -----------------------------
+# -                                Defaults state                              -
+# -                          Defining global constants                         -
+# ------------------------------------------------------------------------------
+
+
 import tkinter as tk
 
 # Student List
@@ -42,17 +57,20 @@ students = [
         "09-12-84", "taylor.susan@gmail.com"],
     ["Jim", "Costner", "07472889335", ["BI", "PH", "IT", "EN"],
         "08-06-72", "j.costner@gmail.com"],
-
 ]
 
-# App State
+# ---------------------------------- App State ---------------------------------
+# -       menu_open: the currently opened dialog eg: menu_open = "Search"      -
+# -        update: elements that needs rerendering eg: update = ["list"]       -
+# ------------------------------------------------------------------------------
+
+
 state = {
     "menu_open": None,
     "update": []
 }
 
-
-# App Constants
+# ---------------------------------- Constants ---------------------------------
 WIN_WIDTH = 1200
 WIN_HEIGHT = 450
 TABLE_ROWS = 10
@@ -70,35 +88,26 @@ SUBJECTS = {
     "EN": "English",
     "FL": "Foreign Language",
     "HI": "History"}
-# Color Palette and GUI Constants
+
+# ----------------------- Color Palette and GUI constants ----------------------
 PRIMARY_BG = "#1a1a1a"
 PRIMARY_FG = "#c2c2c2"
 HOVER_BTN_BG = "#333333"
 HOVER_BTN_FG = "white"
 ACTIVE_FG = "#4cc3f1"
+
 LRG_FONT = 12
+MID_FONT = 10
 SML_FONT = 9
 
+# --------------------------- Component Declarations ----------------------------
+# -                  for custom widget settings like hover                     -
+# -                as Tkinter has no such built in functionality               -
+# ------------------------------------------------------------------------------
 
-# GUI
-window = tk.Tk()
-window.title("Student Management System")
-# Center App
-screen_width = window.winfo_screenwidth()
-screen_height = window.winfo_screenheight()
-window.geometry(
-    f"{WIN_WIDTH}x{WIN_HEIGHT}+{(screen_width // 2) - (WIN_WIDTH // 2)}+{(screen_height // 2) - (WIN_HEIGHT // 2)}")
-window.resizable(False, False)
-
-# MENU
-# ttk themed styles have inconsistent look on different OSs, therefore style attr.s are declared inline
-sidebar = tk.Frame(window, bg=PRIMARY_BG, height=WIN_HEIGHT, width=150)
-sidebar.grid(row=0, column=0)
-sidebar.grid_propagate(False)
-sidebar.grid_columnconfigure(0, weight=1)
+# ---------------------------- Main Button Class -------------------------------
 
 
-# BUTTONS
 class MainButton(tk.Button):
     def __init__(self, master, **kw):
         tk.Button.__init__(
@@ -110,18 +119,160 @@ class MainButton(tk.Button):
             borderwidth=0,
             activebackground=HOVER_BTN_BG,
             activeforeground=ACTIVE_FG,
-            relief="flat",
+            relief=tk.FLAT,
             font=LRG_FONT,
-            **kw)
+            cursor="hand2",
+            ** kw)
+
         self.bind("<Enter>", lambda event: self.config(
             background=HOVER_BTN_BG,
             foreground=ACTIVE_FG)
         )
+
         self.bind("<Leave>", lambda event: self.config(
             background=PRIMARY_BG,
             foreground=PRIMARY_FG)
         )
 
+# ---------------------------- Dialog Button Class -----------------------------
+
+
+class DialogButton(tk.Button):
+    def __init__(self, master, **kw):
+        tk.Button.__init__(
+            self,
+            master=master,
+            background=PRIMARY_BG,
+            foreground=PRIMARY_FG,
+            activebackground=HOVER_BTN_BG,
+            activeforeground=ACTIVE_FG,
+            borderwidth=2,
+            relief=tk.RIDGE,
+            highlightbackground="red",
+            highlightcolor="red",
+            font=MID_FONT,
+            cursor="hand2",
+            ** kw)
+
+        self.bind("<Enter>", lambda event: self.config(
+            background=HOVER_BTN_BG,
+            foreground="white")
+        )
+
+        self.bind("<Leave>", lambda event: self.config(
+            background=PRIMARY_BG,
+            foreground=PRIMARY_FG)
+        )
+
+
+# ------------------------------- Main Functions -------------------------------
+# -                             Rendering Dialogs                              -
+# ------------------------------------------------------------------------------
+
+
+def createDialog(dialog_name):
+    print(dialog_name)
+    if (dialog_name == "Search"):
+        # Search dialog container
+        search_frame = tk.Frame(
+            window,
+            width=400,
+            background=PRIMARY_BG)
+        search_frame.place(
+            bordermode=tk.INSIDE,
+            x=150,
+            y=0)
+        search_frame.grid_columnconfigure(0, minsize=400)
+
+        # Search dialog header
+        search_header_label = tk.Label(
+            search_frame,
+            background=PRIMARY_BG,
+            foreground=PRIMARY_FG,
+            text="Search student by",
+            font=MID_FONT,
+            justify=tk.CENTER,
+            anchor=tk.CENTER)
+        search_header_label.grid(row=0, column=0)
+
+        # Search dialog frame
+        search_form_frame = tk.Frame(
+            search_frame,
+            width=400,
+            background=PRIMARY_BG)
+        search_form_frame.grid(row=1, column=0)
+        search_form_frame.grid_columnconfigure(0, minsize=200)
+        search_form_frame.grid_columnconfigure(1, minsize=200)
+
+        # Search dialog phone num input
+        search_form_phone_input = tk.Entry(
+            search_form_frame,
+            background="#bbbbbb",
+            foreground=PRIMARY_BG,
+            font=MID_FONT,
+            relief=tk.FLAT,
+            justify=tk.CENTER)
+        search_form_phone_input.grid(row=0, column=0)
+
+        # Serach dialog phone num label
+        search_form_phone_btn = DialogButton(
+            search_form_frame,
+            text="Phone",
+            justify=tk.CENTER,
+            anchor=tk.CENTER)
+        search_form_phone_btn.grid(row=0, column=1, sticky=tk.NSEW)
+
+        # Serach dialog email input
+        search_form_email_input = tk.Entry(
+            search_form_frame,
+            background="#bbbbbb",
+            foreground=PRIMARY_BG,
+            font=MID_FONT,
+            relief=tk.FLAT,
+            justify=tk.CENTER)
+        search_form_email_input.grid(row=1, column=0)
+
+        # Serach dialog email label
+        search_form_email_btn = DialogButton(
+            search_form_frame,
+            text="Email",
+            justify=tk.CENTER,
+            anchor=tk.CENTER)
+        search_form_email_btn.grid(row=1, column=1, sticky=tk.NSEW)
+
+    state["menu_open"] = None  # ---- Reset state so listener does not re-paint
+
+
+# ------------------------------ RENDER GUI WINDOW -----------------------------
+# -                   Create mainloop, render main menu and table              -
+# -                             Invoke stateListener                           -
+# ------------------------------------------------------------------------------
+
+
+window = tk.Tk()
+window.title("Student Management System")
+# Center App
+screen_width = window.winfo_screenwidth()
+screen_height = window.winfo_screenheight()
+window.geometry(
+    f"{WIN_WIDTH}x{WIN_HEIGHT}+{(screen_width // 2) - (WIN_WIDTH // 2)}+{(screen_height // 2) - (WIN_HEIGHT // 2)}")
+# ------------ will not develop responsive design
+window.resizable(False, False)
+
+
+# ----------------------------------- Sidebar ----------------------------------
+# -            ttk themed styles have inconsistent look on different OSs       -
+# -                   therefore style attr-s are declared inline               -
+# ------------------------------------------------------------------------------
+
+
+sidebar = tk.Frame(window, bg=PRIMARY_BG, height=WIN_HEIGHT, width=150)
+sidebar.grid(row=0, column=0)
+sidebar.grid_propagate(False)
+sidebar.grid_columnconfigure(0, weight=1)
+
+
+# -------------------------------- Main Buttons --------------------------------
 
 for index, btn_name in enumerate(BUTTONS[:-1]):
     btn = MainButton(
@@ -130,12 +281,16 @@ for index, btn_name in enumerate(BUTTONS[:-1]):
         command=lambda new_state=btn_name: setState(new_state))
     btn.grid(row=index, column=0)
 
+# -------------------------------- Exit Button ---------------------------------
+
 exit_btn = MainButton(sidebar, text=BUTTONS[-1], command=window.destroy)
 exit_btn.grid(row=len(BUTTONS), column=0, sticky="s")
+
 sidebar.grid_rowconfigure(len(BUTTONS), weight=1)
 
 
-# DATA DISPLAY
+# -------------------------------- Data Display --------------------------------
+
 display = tk.Frame(
     window,
     height=WIN_HEIGHT,
@@ -144,19 +299,24 @@ display = tk.Frame(
 display.grid(row=0, column=1)
 display.grid_propagate(False)
 
-# CAPTURE
-capture = tk.Frame(display, height=20, width=1050)
-capture.grid(row=0, column=0)
-capture.grid_propagate(False)
+# ---------------------------------- Caption -----------------------------------
+
+caption = tk.Frame(display, height=20, width=1050)
+caption.grid(row=0, column=0)
+caption.grid_propagate(False)
 
 table_container = tk.Frame(display, height=400, width=1050)
 
 
+# -------------------------------- Table Creation ------------------------------
+# -                   Student table has its own create function.               -
+# -       If student data is modified, table is destroyed and recreated        -
+# ------------------------------------------------------------------------------
+
 def createTable(table_container):
-    print("Here", students[0])
     for index, c_name in enumerate(CAPTION_NAMES):
         cap = tk.Label(
-            capture,
+            caption,
             text=c_name,
             background="#bbbbbb",
             relief="ridge",
@@ -164,9 +324,10 @@ def createTable(table_container):
             width=30)
         cap.grid(row=0, column=index)
         cap.grid_propagate(False)
-        capture.grid_columnconfigure(index, weight=1)
+        caption.grid_columnconfigure(index, weight=1)
 
-    # TABLE
+# -------------------------------- Student List --------------------------------
+
     table_container.grid(row=1, column=0)
     table_container.grid_propagate(False)
     table_container.grid_columnconfigure(0, weight=0)
@@ -203,41 +364,28 @@ def createTable(table_container):
         table_container.grid_columnconfigure(0, weight=1)
         table_container.grid_rowconfigure(0, weight=1)
 
-    def monitorState():
+    def listeningState():
         if "table" in state["update"]:
             state["update"].remove("table")
-            print(state["update"])
             table_container.destroy()
             updated_table_container = tk.Frame(display, height=400, width=1050)
             createTable(updated_table_container)
 
-        window.after(100, monitorState)
+        if (state["menu_open"]):
+            createDialog(state["menu_open"])
 
-    monitorState()
+        window.after(100, listeningState)
+
+    listeningState()
 
 
 createTable(table_container)
 
 
-# FOOTER
+# --------------------------------- Footer -------------------------------------
 footer = tk.Frame(display, height=32, width=1050, bg=PRIMARY_BG)
 footer.grid(row=2, column=0)
 footer.grid_propagate(False)
-
-
-# SEARCH WINDOW
-if state["menu_open"]:
-    print(state["menu_open"])
-    search_win = tk.Frame(window, background=PRIMARY_BG)
-    search_win.place(
-        bordermode=tk.INSIDE,
-        height=100,
-        width=500,
-        relx=0.5,
-        rely=0.5,
-        anchor=tk.CENTER)
-    label = tk.Label(search_win, text="", background="red")
-    label.grid(row=0, column=0)
 
 
 def setState(new_state):
