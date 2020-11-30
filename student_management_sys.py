@@ -67,8 +67,9 @@ students = [
 
 state = {
     "menu_open": None,
-    "update": []
+    "update": [],
 }
+
 
 # ---------------------------------- Constants ---------------------------------
 WIN_WIDTH = 1200
@@ -142,15 +143,15 @@ class DialogButton(tk.Button):
         tk.Button.__init__(
             self,
             master=master,
-            background=PRIMARY_BG,
+            background="#252525",
             foreground=PRIMARY_FG,
             activebackground=HOVER_BTN_BG,
             activeforeground=ACTIVE_FG,
-            borderwidth=2,
+            borderwidth=1,
             relief=tk.RIDGE,
-            highlightbackground="red",
-            highlightcolor="red",
             font=MID_FONT,
+            justify=tk.CENTER,
+            anchor=tk.CENTER,
             cursor="hand2",
             ** kw)
 
@@ -160,9 +161,41 @@ class DialogButton(tk.Button):
         )
 
         self.bind("<Leave>", lambda event: self.config(
-            background=PRIMARY_BG,
+            background="#252525",
             foreground=PRIMARY_FG)
         )
+
+
+# ----------------------------- Dialog Input Class -----------------------------
+
+
+class DialogInput(tk.Entry):
+    def __init__(self, master, **kw):
+        tk.Entry.__init__(
+            self,
+            master=master,
+            background="#ddd",
+            foreground=PRIMARY_BG,
+            font=MID_FONT,
+            relief=tk.FLAT,
+            justify=tk.LEFT,
+            ** kw)
+
+
+# ----------------------------- Dialog Label Class -----------------------------
+
+
+class DialogLabel(tk.Label):
+    def __init__(self, master, **kw):
+        tk.Label.__init__(
+            self,
+            master=master,
+            background=PRIMARY_BG,
+            foreground=PRIMARY_FG,
+            font=MID_FONT,
+            justify=tk.CENTER,
+            anchor=tk.CENTER,
+            ** kw)
 
 
 # ------------------------------- Main Functions -------------------------------
@@ -170,75 +203,58 @@ class DialogButton(tk.Button):
 # ------------------------------------------------------------------------------
 
 
+# ------------------------------- Search by Phone  -----------------------------
+def submit_search_by_phone(phone_value):
+    print("search_by_phone", phone_value.get())
+
+# ------------------------------ Search Dialog Box -----------------------------
+
+
+def renderSearchDialog():
+    # Search dialog container
+    search_frame = tk.Frame(
+        window,
+        width=400,
+        background=PRIMARY_BG)
+    search_frame.place(bordermode=tk.INSIDE, x=150, y=0)
+    search_frame.grid_columnconfigure(0, minsize=400)
+
+    # Search dialog header
+    search_header_label = DialogLabel(
+        search_frame, text="Search student by")
+    search_header_label.grid(row=0, column=0, padx=10)
+
+    # Search dialog frame
+    search_form_frame = tk.Frame(
+        search_frame, width=400, background=PRIMARY_BG)
+    search_form_frame.grid(row=1, column=0, padx=15, pady=5)
+    search_form_frame.grid_columnconfigure(0, minsize=200)
+    search_form_frame.grid_columnconfigure(1, minsize=200)
+
+    phone_value = tk.StringVar()
+    # Search dialog phone num input
+    search_form_phone_input = DialogInput(
+        search_form_frame, textvariable=phone_value)
+    search_form_phone_input.grid(row=0, column=0)
+
+    # Serach dialog phone num label
+    search_form_phone_btn = DialogButton(
+        search_form_frame, text="Phone", command=lambda: submit_search_by_phone(phone_value))
+    search_form_phone_btn.grid(row=0, column=1, sticky=tk.NSEW, pady=5)
+
+    # Serach dialog email input
+    search_form_email_input = DialogInput(search_form_frame)
+    search_form_email_input.grid(row=1, column=0, pady=5)
+
+    # Serach dialog email label
+    search_form_email_btn = DialogButton(search_form_frame, text="Email")
+    search_form_email_btn.grid(row=1, column=1, sticky=tk.NSEW, pady=5)
+
+
 def createDialog(dialog_name):
     print(dialog_name)
     if (dialog_name == "Search"):
-        # Search dialog container
-        search_frame = tk.Frame(
-            window,
-            width=400,
-            background=PRIMARY_BG)
-        search_frame.place(
-            bordermode=tk.INSIDE,
-            x=150,
-            y=0)
-        search_frame.grid_columnconfigure(0, minsize=400)
-
-        # Search dialog header
-        search_header_label = tk.Label(
-            search_frame,
-            background=PRIMARY_BG,
-            foreground=PRIMARY_FG,
-            text="Search student by",
-            font=MID_FONT,
-            justify=tk.CENTER,
-            anchor=tk.CENTER)
-        search_header_label.grid(row=0, column=0)
-
-        # Search dialog frame
-        search_form_frame = tk.Frame(
-            search_frame,
-            width=400,
-            background=PRIMARY_BG)
-        search_form_frame.grid(row=1, column=0)
-        search_form_frame.grid_columnconfigure(0, minsize=200)
-        search_form_frame.grid_columnconfigure(1, minsize=200)
-
-        # Search dialog phone num input
-        search_form_phone_input = tk.Entry(
-            search_form_frame,
-            background="#bbbbbb",
-            foreground=PRIMARY_BG,
-            font=MID_FONT,
-            relief=tk.FLAT,
-            justify=tk.CENTER)
-        search_form_phone_input.grid(row=0, column=0)
-
-        # Serach dialog phone num label
-        search_form_phone_btn = DialogButton(
-            search_form_frame,
-            text="Phone",
-            justify=tk.CENTER,
-            anchor=tk.CENTER)
-        search_form_phone_btn.grid(row=0, column=1, sticky=tk.NSEW)
-
-        # Serach dialog email input
-        search_form_email_input = tk.Entry(
-            search_form_frame,
-            background="#bbbbbb",
-            foreground=PRIMARY_BG,
-            font=MID_FONT,
-            relief=tk.FLAT,
-            justify=tk.CENTER)
-        search_form_email_input.grid(row=1, column=0)
-
-        # Serach dialog email label
-        search_form_email_btn = DialogButton(
-            search_form_frame,
-            text="Email",
-            justify=tk.CENTER,
-            anchor=tk.CENTER)
-        search_form_email_btn.grid(row=1, column=1, sticky=tk.NSEW)
+        renderSearchDialog()
 
     state["menu_open"] = None  # ---- Reset state so listener does not re-paint
 
