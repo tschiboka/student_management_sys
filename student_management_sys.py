@@ -70,7 +70,8 @@ SUBJECTS = {
     "GE": "Geology",
     "EN": "English",
     "FL": "Foreign Language",
-    "HI": "History"}
+    "HI": "History",
+    "PR": "Programming"}
 
 # ----------------------- Color Palette and GUI constants ----------------------
 PRIMARY_BG = "#1a1a1a"
@@ -271,14 +272,14 @@ def renderSearchDialog():
         search_form_frame, textvariable=phone_value)
     search_form_phone_input.grid(row=0, column=0)
 
-    # Serach dialog phone num label
+    # Search dialog phone num label
     search_form_phone_btn = DialogButton(
         search_form_frame, text="Phone",
         command=lambda: submit_search("phone", phone_value, search_frame))
     search_form_phone_btn.grid(row=0, column=1, sticky=tk.NSEW, pady=5)
 
     email_value = tk.StringVar()
-    # Serach dialog email input
+    # Search dialog email input
     search_form_email_input = DialogInput(
         search_form_frame, textvariable=email_value)
     search_form_email_input.grid(row=1, column=0, pady=5)
@@ -291,7 +292,140 @@ def renderSearchDialog():
     search_form_email_btn.grid(row=1, column=1, sticky=tk.NSEW, pady=5)
 
 
+# --------------------------- Filter Submit Function --------------------------
+def submitFilter():
+    print("FILTER")
+
+
+# ----------------------------- Filter Dialog Box -----------------------------
+def renderFilterDialog():
+    # Filter Dialog Container
+    filter_frame = tk.Frame(
+        window,
+        width=400,
+        background=PRIMARY_BG)
+    filter_frame.place(bordermode=tk.INSIDE, x=150, y=27)
+    filter_frame.grid_columnconfigure(0, minsize=400)
+
+    # Filter Dialog Header
+    filter_header_frame = tk.Frame(
+        filter_frame, background=PRIMARY_BG)
+    filter_header_frame.grid(row=0, column=0)
+
+    filter_header_label = DialogLabel(
+        filter_header_frame, text="Filter students by")
+    filter_header_label.grid(row=0, column=0, padx=10)
+
+    # Filter Dialog Close Button
+    filter_close_btn = CloseButton(
+        filter_frame, command=lambda: filter_frame.destroy())
+    filter_close_btn.grid(row=0, column=1)
+
+    # Filter Dialog Body
+    filter_body_frame = tk.Frame(filter_frame, background=PRIMARY_BG)
+    filter_body_frame.grid(row=1, column=0, sticky=tk.NSEW)
+    filter_body_frame.grid_columnconfigure(0, minsize=400)
+
+    # Filter Dialog First Name
+    filter_f_name_frame = tk.Frame(
+        filter_body_frame, background=PRIMARY_BG)
+    filter_f_name_frame.grid(row=0, column=0)
+
+    filter_f_name_label = tk.Label(
+        filter_f_name_frame,
+        text="First Name",
+        background=PRIMARY_BG,
+        foreground=PRIMARY_FG,
+        width=28,
+        justify=tk.LEFT,
+        anchor=tk.W)
+    filter_f_name_label.grid(row=0, column=0, sticky=tk.W)
+
+    filter_f_name_input = DialogInput(filter_f_name_frame, width=20)
+    filter_f_name_input.grid(row=0, column=1, pady=2)
+
+    # Filter Dialog Last Name
+    filter_l_name_frame = tk.Frame(
+        filter_body_frame, background=PRIMARY_BG)
+    filter_l_name_frame.grid(row=1, column=0)
+
+    filter_l_name_label = tk.Label(
+        filter_l_name_frame,
+        text="Last Name",
+        background=PRIMARY_BG,
+        foreground=PRIMARY_FG,
+        width=28,
+        justify=tk.LEFT,
+        anchor=tk.W)
+    filter_l_name_label.grid(row=0, column=0)
+
+    filter_l_name_input = DialogInput(filter_l_name_frame, width=20)
+    filter_l_name_input.grid(row=0, column=1)
+
+    # Filter Dialog Date of Birth
+    filter_dob_frame = tk.Frame(
+        filter_body_frame, background=PRIMARY_BG)
+    filter_dob_frame.grid(row=2, column=0)
+
+    filter_dob_label = tk.Label(
+        filter_dob_frame,
+        text="Date of Birth [dd,mm,yy]",
+        background=PRIMARY_BG,
+        foreground=PRIMARY_FG,
+        width=28,
+        justify=tk.LEFT,
+        anchor=tk.W)
+    filter_dob_label.grid(row=0, column=0, pady=2)
+
+    # Filter Dialog DOB Day
+    filter_day_input = DialogInput(filter_dob_frame, width=2)
+    filter_day_input.grid(row=0, column=1, padx=10, sticky=tk.E)
+
+    # Filter Dialog DOB Month
+    filter_month_input = DialogInput(filter_dob_frame, width=2,)
+    filter_month_input.grid(row=0, column=2, padx=10, sticky=tk.E)
+
+    # Filter Dialog  DOB Year
+    filter_year_input = DialogInput(filter_dob_frame, width=2)
+    filter_year_input.grid(row=0, column=3, padx=10, sticky=tk.E)
+
+    # Filter Dialog Subject Container
+    filter_subject_frame = tk.Frame(
+        filter_body_frame, background=PRIMARY_BG)
+    filter_subject_frame.grid(row=3, column=0)
+
+    # Filter Dialog Subjects
+    for index, prop in enumerate(SUBJECTS):
+        subject = SUBJECTS[prop]
+        txt = f"{subject} [{prop}]"
+        filter_subj_label = tk.Label(
+            filter_subject_frame,
+            text=txt,
+            background=PRIMARY_BG,
+            foreground=PRIMARY_FG,
+            width=50,
+            justify=tk.LEFT,
+            anchor=tk.W)
+        filter_subj_label.grid(row=index, column=0, sticky="W")
+
+        filter_subj_btn = tk.Checkbutton(
+            filter_subject_frame,
+            background=PRIMARY_BG,
+            foreground=ACTIVE_FG,
+            activebackground=PRIMARY_BG)
+        filter_subj_btn.grid(row=index, column=1, sticky="E")
+
+    # Filter Dialog Submit Button
+    filter_submit_btn = DialogButton(
+        filter_body_frame,
+        text="Filter",
+        command=submitFilter)
+    filter_submit_btn.grid(row=4, column=0)
+
+
 # ---------------------------- Selection Functions ----------------------------
+
+
 def selectionMethod(method):
     if method == "all":
         updatedSelection = list(range(len(students)))
@@ -305,6 +439,7 @@ def selectionMethod(method):
     state["selected"] = updatedSelection
     state["update"].append("table")
     state["update"].append("footer")
+
 
 # ---------------------------- Selection Dialog Box ---------------------------
 
@@ -365,9 +500,12 @@ def renderSelectionDialog():
 
 
 def createDialog(dialog_name):
-    print(dialog_name)
     if (dialog_name == "Search"):
         renderSearchDialog()
+
+    if (dialog_name == "Filter"):
+        renderFilterDialog()
+
     if (dialog_name == "Selection"):
         renderSelectionDialog()
 
@@ -615,7 +753,6 @@ def createFooter(footer_container):
 
 # ----------------------------- Pagination Info ---------------------------------
 
-
     def paginate(direction):
         if direction == "+" and state["curr_page"] < state["total_pages"]:
             state["curr_page"] = state["curr_page"] + 1
@@ -652,8 +789,6 @@ def createFooter(footer_container):
     pagination_label3 = tk.Label(
         pagination_frame, text=" of " + str(state["total_pages"]), width=6, background=PRIMARY_BG, foreground=PRIMARY_FG)
     pagination_label3.grid(row=0, column=4)
-
-    print(len(students))
 
 
 createFooter(footer_container)
