@@ -49,7 +49,7 @@ state = {
     "update": [],
     "total_pages": 1,
     "curr_page": 1,
-    "selected": [3, 6, 21]
+    "selected": []
 }
 
 
@@ -420,6 +420,29 @@ def createTable(table_container):
             student_row = [student["f_name"], student["l_name"], student["phone"],
                            student["subjects"], student["dob"], student["email"], "X"]
 
+            # Show Student Information Details Function
+
+            def showStudentInfoDetails(index):
+                student = students[index]
+                f_name = "First Name    : " + student["f_name"]
+                l_name = "Last Name     : " + student["l_name"]
+                dob = "Date of Birth : " + student["dob"]
+                phone = "Phone Number  : " + student["phone"]
+                email = "Email         : " + student["email"]
+                sub_s = student["subjects"]
+
+                # split subject strings by 2-s
+                subs_abbr = [sub_s[i: i + 2] for i in range(0, len(sub_s), 2)]
+
+                # Assign string from abbriviation
+                decor = "\n" + (" " * 16) + u"\u2022 "
+                subs = list(map(lambda s: decor + SUBJECTS[s], subs_abbr))
+                sub_text = "".join(subs)
+
+                details = f"{f_name}\n{l_name}\n{dob}\n{phone}\n{email}\nSubjects      :{sub_text}"
+
+                messagebox.showinfo("Student Details", details)
+
             # Iterate cells
             for index, entry in enumerate(student_row):
                 # Student record
@@ -429,6 +452,8 @@ def createTable(table_container):
                         width=cell_width[index],
                         background=background,
                         text=entry)
+                    cell.bind("<Button 1>", lambda event,
+                              ind=tab_index: showStudentInfoDetails(ind))
                 else:
                     # Toggle Selection
                     def toggleSelect(index):
@@ -440,7 +465,6 @@ def createTable(table_container):
 
                         state["update"].append("table")
                         state["update"].append("footer")
-                        print(state["update"])
 
                     # Selection Checkbox
                     checkbox_text = u"\u25A3" if selected else u"\u25A1"
