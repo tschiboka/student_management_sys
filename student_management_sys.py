@@ -14,50 +14,21 @@
 
 
 import tkinter as tk
+import csv
 
 # Student List
-students = [
-    ["Susan", "Taylor", "07474999335", ["MA", "CH", "GE", "EN"],
-        "09-12-84", "taylor.susan@gmail.com"],
-    ["Jim", "Costner", "07472889335", ["BI", "PH", "IT", "EN"],
-        "08-06-72", "j.costner@gmail.com"],
-    ["Susan", "Taylor", "07474999335", ["MA", "CH", "GE", "EN"],
-     "09-12-84", "taylor.susan@gmail.com"],
-    ["Jim", "Costner", "07472889335", ["BI", "PH", "IT", "EN"],
-        "08-06-72", "j.costner@gmail.com"],
-    ["Susan", "Taylor", "07474999335", ["MA", "CH", "GE", "EN"],
-        "09-12-84", "taylor.susan@gmail.com"],
-    ["Jim", "Costner", "07472889335", ["BI", "PH", "IT", "EN"],
-        "08-06-72", "j.costner@gmail.com"],
-    ["Susan", "Taylor", "07474999335", ["MA", "CH", "GE", "EN"],
-        "09-12-84", "taylor.susan@gmail.com"],
-    ["Jim", "Costner", "07472889335", ["BI", "PH", "IT", "EN"],
-        "08-06-72", "j.costner@gmail.com"],
-    ["Susan", "Taylor", "07474999335", ["MA", "CH", "GE", "EN"],
-        "09-12-84", "taylor.susan@gmail.com"],
-    ["Jim", "Costner", "07472889335", ["BI", "PH", "IT", "EN"],
-        "08-06-72", "j.costner@gmail.com"],
-    ["Susan", "Taylor", "07474999335", ["MA", "CH", "GE", "EN"],
-        "09-12-84", "taylor.susan@gmail.com"],
-    ["Jim", "Costner", "07472889335", ["BI", "PH", "IT", "EN"],
-        "08-06-72", "j.costner@gmail.com"],
-    ["Susan", "Taylor", "07474999335", ["MA", "CH", "GE", "EN"],
-        "09-12-84", "taylor.susan@gmail.com"],
-    ["Jim", "Costner", "07472889335", ["BI", "PH", "IT", "EN"],
-        "08-06-72", "j.costner@gmail.com"],
-    ["Susan", "Taylor", "07474999335", ["MA", "CH", "GE", "EN"],
-        "09-12-84", "taylor.susan@gmail.com"],
-    ["Jim", "Costner", "07472889335", ["BI", "PH", "IT", "EN"],
-        "08-06-72", "j.costner@gmail.com"],
-    ["Susan", "Taylor", "07474999335", ["MA", "CH", "GE", "EN"],
-        "09-12-84", "taylor.susan@gmail.com"],
-    ["Jim", "Costner", "07472889335", ["BI", "PH", "IT", "EN"],
-        "08-06-72", "j.costner@gmail.com"],
-    ["Susan", "Taylor", "07474999335", ["MA", "CH", "GE", "EN"],
-        "09-12-84", "taylor.susan@gmail.com"],
-    ["Jim", "Costner", "07472889335", ["BI", "PH", "IT", "EN"],
-        "08-06-72", "j.costner@gmail.com"],
-]
+students = []
+with open('names.csv', newline='') as csvfile:
+    reader = csv.DictReader(csvfile)
+    for row in reader:
+        students.append({
+            "f_name": row["f_name"],
+            "l_name": row["l_name"],
+            "phone": row["phone"],
+            "subjects": row["subjects"],
+            "dob": row["dob"],
+            "email": row["email"]})
+print(students)
 
 # ---------------------------------- App State ---------------------------------
 # -       menu_open: the currently opened dialog eg: menu_open = "Search"      -
@@ -205,7 +176,10 @@ class DialogLabel(tk.Label):
 
 # ------------------------------- Search by Phone  -----------------------------
 def submit_search_by_phone(phone_value):
-    print("search_by_phone", phone_value.get())
+    value = phone_value.get()
+#    student = [*filter(lambda student: student.phone == phone_value, students)]
+#    print(student)
+
 
 # ------------------------------ Search Dialog Box -----------------------------
 
@@ -355,6 +329,8 @@ def createTable(table_container):
         for row_index, student in enumerate(students):
             row = tk.Frame(table_container, width=1050, height=20)
 
+            student = [student["f_name"], student["l_name"], student["phone"],
+                       student["subjects"], student["dob"], student["email"]]
             for index, entry in enumerate(student):
                 col = tk.Label(
                     row,
