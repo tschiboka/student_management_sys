@@ -182,9 +182,15 @@ class DialogLabel(tk.Label):
 
 # ------------------------------- Search by Phone  -----------------------------
 def submit_search_by_phone(phone_value):
+    global students
     value = phone_value.get()
-    student = filter(
-        lambda student: student["phone"] == value, students)
+
+    searched_student = list(filter(
+        lambda student: student["phone"] == value, students))
+    if len(searched_student):
+        students = searched_student
+
+    state["update"].append("table")
 
 
 # ------------------------------ Search Dialog Box -----------------------------
