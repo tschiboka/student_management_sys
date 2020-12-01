@@ -48,7 +48,8 @@ state = {
     "menu_open": None,
     "update": [],
     "total_pages": 1,
-    "curr_page": 1
+    "curr_page": 1,
+    "selected": [3, 6, 21]
 }
 
 
@@ -58,8 +59,8 @@ WIN_HEIGHT = 450
 TABLE_ROWS = 10
 BUTTONS = ["Search", "Filter", "Sort", "New",
            "Modify", "Insert", "Delete", "Exit"]
-CAPTION_NAMES = ["First Name", "Second Name",
-                 "Phone", "Subjects", "DOB", "Email"]
+CAPTION_NAMES = ["First Name", "Last Name",
+                 "Phone", "Subjects", "DOB", "Email", u"\u2713"]
 SUBJECTS = {
     "MA": "Maths",
     "CH": "Chemistry",
@@ -77,6 +78,7 @@ PRIMARY_FG = "#c2c2c2"
 HOVER_BTN_BG = "#333333"
 HOVER_BTN_FG = "white"
 ACTIVE_FG = "#4cc3f1"
+SELECTED_BG = "#95EAC1"
 
 LRG_FONT = 12
 MID_FONT = 10
@@ -368,14 +370,15 @@ table_container = tk.Frame(display, height=400, width=1050)
 # ------------------------------------------------------------------------------
 
 def createTable(table_container):
+    cell_width = [35, 35, 20, 20, 20, 35, 7]
+
     for index, c_name in enumerate(CAPTION_NAMES):
         cap = tk.Label(
             caption,
+            width=cell_width[index],
             text=c_name,
-            background="#bbbbbb",
-            relief="ridge",
-            borderwidth=1,
-            width=30)
+            background=PRIMARY_BG,
+            foreground=PRIMARY_FG)
         cap.grid(row=0, column=index)
         cap.grid_propagate(False)
         caption.grid_columnconfigure(index, weight=1)
@@ -396,21 +399,68 @@ def createTable(table_container):
 
     if len(list_to_display):
         for row_index, student in enumerate(list_to_display):
-            row = tk.Frame(table_container, width=1050, height=20)
 
-            student = [student["f_name"], student["l_name"], student["phone"],
-                       student["subjects"], student["dob"], student["email"]]
-            for index, entry in enumerate(student):
-                col = tk.Label(
-                    row,
-                    text=entry,
-                    relief="sunken",
-                    borderwidth=1,
-                    width=30)
-                col.grid(row=0, column=index)
-                col.grid_propagate(False)
+            # Every secound row darker
+            background = "#c7c7c7"
+            if row_index % 2 == 0:
+                background = "#e5e5e5"
+
+            # Check if student is selected
+            tab_index = (state["curr_page"] - 1) * 20 + row_index
+            selected = True if tab_index in state["selected"] else False
+            if selected:
+                background = SELECTED_BG
+
+            row = tk.Frame(
+                table_container,
+                width=1050,
+                height=20,
+                background=background)
+
+            student_row = [student["f_name"], student["l_name"], student["phone"],
+                           student["subjects"], student["dob"], student["email"], "X"]
+
+            # Iterate cells
+            for index, entry in enumerate(student_row):
+                # Student record
+                if index < 6:
+                    cell = tk.Label(
+                        row,
+                        width=cell_width[index],
+                        background=background,
+                        text=entry)
+                else:
+                    # Toggle Selection
+                    def toggleSelect(index):
+                        updated_selected = state["selected"]
+                        if index in state["selected"]:
+                            updated_selected.remove(index)
+                        else:
+                            updated_selected.append(index)
+
+                        state["update"].append("table")
+                        print(state["selected"])
+
+                    checkbox_text = u"\u25A3" if selected else u"\u25A1"
+                    checkbox_color = SELECTED_BG if selected else PRIMARY_FG
+
+                    # Selection Checkbox
+                    cell = tk.Label(
+                        row,
+                        text=checkbox_text,
+                        foreground=checkbox_color,
+                        width=cell_width[index],
+                        background=PRIMARY_BG)
+
+                    # bind clicke event to label using closures
+                    cell.bind("<Button-1>",
+                              lambda event, ind=tab_index: toggleSelect(ind))
+
+                cell.grid(row=0, column=index)
+                cell.grid_propagate(False)
                 row.grid_columnconfigure(index, weight=1)
 
+            row.grid_columnconfigure(index, weight=1)
             row.grid(row=row_index, column=0)
             row.grid_propagate(False)
             table_container.grid_columnconfigure(index, weight=1)
@@ -450,7 +500,7 @@ def createFooter():
     footer.grid_propagate(False)
 
     filter_info_frame = tk.Frame(
-        footer, width=905, height=32, background=PRIMARY_BG)
+        footer, width=880, height=32, background=PRIMARY_BG)
     filter_info_frame.grid(row=0, column=0)
 
     def paginationForward(direction):
@@ -465,7 +515,7 @@ def createFooter():
         createFooter()
 
     pagination_frame = tk.Frame(
-        footer, width=145, height=32, background=PRIMARY_BG)
+        footer, width=160, height=32, background=PRIMARY_BG)
     pagination_frame.grid(row=0, column=1)
     pagination_frame.grid_propagate(False)
 
@@ -478,7 +528,7 @@ def createFooter():
     pagination_backwards_btn.grid(row=0, column=1)
 
     pagination_label2 = tk.Label(
-        pagination_frame, text=state["curr_page"], width=3, background=PRIMARY_BG, foreground=PRIMARY_FG)
+        pagination_frame, text=state["curr_page"], width=3, background=PRIMARY_BG, foreground=ACTIVE_FG)
     pagination_label2.grid(row=0, column=2)
 
     pagination_forward_btn = DialogButton(
@@ -486,7 +536,7 @@ def createFooter():
     pagination_forward_btn.grid(row=0, column=3)
 
     pagination_label3 = tk.Label(
-        pagination_frame, text=state["total_pages"], width=3, background=PRIMARY_BG, foreground=PRIMARY_FG)
+        pagination_frame, text=" of " + str(state["total_pages"]), width=6, background=PRIMARY_BG, foreground=PRIMARY_FG)
     pagination_label3.grid(row=0, column=4)
 
     print(len(students))
