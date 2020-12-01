@@ -147,6 +147,37 @@ class DialogButton(tk.Button):
         )
 
 
+# ---------------------------- Close Button Class -----------------------------
+
+
+class CloseButton(tk.Button):
+    def __init__(self, master, **kw):
+        tk.Button.__init__(
+            self,
+            master=master,
+            width=3,
+            background="#252525",
+            foreground="#FF1439",
+            activebackground=HOVER_BTN_BG,
+            activeforeground="#FF1439",
+            borderwidth=1,
+            relief=tk.RIDGE,
+            font=14,
+            text=u"\u00D7",
+            justify=tk.CENTER,
+            anchor=tk.CENTER,
+            cursor="hand2",
+            ** kw)
+
+        self.bind("<Enter>", lambda event: self.config(
+            background=HOVER_BTN_BG)
+        )
+
+        self.bind("<Leave>", lambda event: self.config(
+            background="#252525")
+        )
+
+
 # ----------------------------- Dialog Input Class -----------------------------
 
 
@@ -213,9 +244,17 @@ def renderSearchDialog():
     search_frame.grid_columnconfigure(0, minsize=400)
 
     # Search dialog header
+    search_header_frame = tk.Frame(
+        search_frame, width=370, background=PRIMARY_BG)
+    search_header_frame.grid(row=0, column=0)
+
     search_header_label = DialogLabel(
-        search_frame, text="Search student by")
+        search_header_frame, text="Search student by")
     search_header_label.grid(row=0, column=0, padx=10)
+
+    search_close_btn = CloseButton(
+        search_frame, command=lambda: search_frame.destroy())
+    search_close_btn.grid(row=0, column=1)
 
     # Search dialog frame
     search_form_frame = tk.Frame(
@@ -348,9 +387,11 @@ def createTable(table_container):
     table_container.grid_columnconfigure(0, weight=0)
     table_container.grid_rowconfigure(0, weight=0)
 
+    # divide list into chunks of 20 items
     chunks = [students[i:i + 20] for i in range(0, len(students), 20)]
     state["total_pages"] = math.ceil(len(students) / 20)
 
+    # display current chunk of data
     list_to_display = chunks[state["curr_page"] - 1]
 
     if len(list_to_display):
