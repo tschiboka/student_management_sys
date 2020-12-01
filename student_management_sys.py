@@ -13,6 +13,7 @@
 # ------------------------------------------------------------------------------
 
 
+import math
 import csv
 import tkinter as tk
 from tkinter import messagebox
@@ -347,10 +348,13 @@ def createTable(table_container):
     table_container.grid_columnconfigure(0, weight=0)
     table_container.grid_rowconfigure(0, weight=0)
 
-    list_to_display = students
+    chunks = [students[i:i + 20] for i in range(0, len(students), 20)]
+    state["total_pages"] = math.ceil(len(students) / 20)
+
+    list_to_display = chunks[state["curr_page"] - 1]
 
     if len(list_to_display):
-        for row_index, student in enumerate(students):
+        for row_index, student in enumerate(list_to_display):
             row = tk.Frame(table_container, width=1050, height=20)
 
             student = [student["f_name"], student["l_name"], student["phone"],
@@ -399,15 +403,25 @@ createTable(table_container)
 
 
 # --------------------------------- Footer -------------------------------------
-footer = tk.Frame(display, height=32, width=1050, bg=PRIMARY_BG)
-footer.grid(row=2, column=0)
-footer.grid_propagate(False)
-
-
 def createFooter():
+    footer = tk.Frame(display, height=32, width=1050, bg=PRIMARY_BG)
+    footer.grid(row=2, column=0)
+    footer.grid_propagate(False)
+
     filter_info_frame = tk.Frame(
         footer, width=905, height=32, background=PRIMARY_BG)
     filter_info_frame.grid(row=0, column=0)
+
+    def paginationForward(direction):
+        if direction == "+" and state["curr_page"] < state["total_pages"]:
+            state["curr_page"] = state["curr_page"] + 1
+
+        if direction == "-" and state["curr_page"] > 1:
+            state["curr_page"] = state["curr_page"] - 1
+
+        state["update"].append("table")
+        footer.destroy()
+        createFooter()
 
     pagination_frame = tk.Frame(
         footer, width=145, height=32, background=PRIMARY_BG)
@@ -419,19 +433,22 @@ def createFooter():
     pagination_label1.grid(row=0, column=0)
 
     pagination_backwards_btn = DialogButton(
-        pagination_frame, text="<", width=2)
+        pagination_frame, text="<", width=2, command=lambda: paginationForward("-"))
     pagination_backwards_btn.grid(row=0, column=1)
 
     pagination_label2 = tk.Label(
         pagination_frame, text=state["curr_page"], width=3, background=PRIMARY_BG, foreground=PRIMARY_FG)
     pagination_label2.grid(row=0, column=2)
 
-    pagination_forward_btn = DialogButton(pagination_frame, text=">", width=2)
+    pagination_forward_btn = DialogButton(
+        pagination_frame, text=">", width=2, command=lambda: paginationForward("+"))
     pagination_forward_btn.grid(row=0, column=3)
 
     pagination_label3 = tk.Label(
         pagination_frame, text=state["total_pages"], width=3, background=PRIMARY_BG, foreground=PRIMARY_FG)
     pagination_label3.grid(row=0, column=4)
+
+    print(len(students))
 
 
 createFooter()
