@@ -13,8 +13,9 @@
 # ------------------------------------------------------------------------------
 
 
-import tkinter as tk
 import csv
+import tkinter as tk
+from tkinter import messagebox
 
 # ---------------------------- Get Students From CSV ---------------------------
 
@@ -181,17 +182,20 @@ class DialogLabel(tk.Label):
 
 
 # ------------------------------- Search by Phone  -----------------------------
-def submit_search_by_phone(phone_value):
+def submit_search(prop, value, dialog):
     global students
-    value = phone_value.get()
+    input_value = value.get()
 
     searched_student = list(filter(
-        lambda student: student["phone"] == value, students))
+        lambda student: str.upper(student[prop]) == str.upper(input_value), students))
     if len(searched_student):
         students = searched_student
+    else:
+        messagebox.showinfo("Error", f"No Students with name\n{input_value}")
 
     state["update"].append("table")
-
+    setDialog(None)
+    dialog.destroy()
 
 # ------------------------------ Search Dialog Box -----------------------------
 
@@ -225,15 +229,21 @@ def renderSearchDialog():
 
     # Serach dialog phone num label
     search_form_phone_btn = DialogButton(
-        search_form_frame, text="Phone", command=lambda: submit_search_by_phone(phone_value))
+        search_form_frame, text="Phone",
+        command=lambda: submit_search("phone", phone_value, search_frame))
     search_form_phone_btn.grid(row=0, column=1, sticky=tk.NSEW, pady=5)
 
+    email_value = tk.StringVar()
     # Serach dialog email input
-    search_form_email_input = DialogInput(search_form_frame)
+    search_form_email_input = DialogInput(
+        search_form_frame, textvariable=email_value)
     search_form_email_input.grid(row=1, column=0, pady=5)
 
     # Serach dialog email label
-    search_form_email_btn = DialogButton(search_form_frame, text="Email")
+    search_form_email_btn = DialogButton(
+        search_form_frame, text="Email",
+        command=lambda: submit_search("email", email_value, search_frame)
+    )
     search_form_email_btn.grid(row=1, column=1, sticky=tk.NSEW, pady=5)
 
 
@@ -280,7 +290,7 @@ for index, btn_name in enumerate(BUTTONS[:-1]):
     btn = MainButton(
         sidebar,
         text=btn_name,
-        command=lambda new_state=btn_name: setState(new_state))
+        command=lambda new_state=btn_name: setDialog(new_state))
     btn.grid(row=index, column=0)
 
 # -------------------------------- Exit Button ---------------------------------
@@ -392,7 +402,7 @@ footer.grid(row=2, column=0)
 footer.grid_propagate(False)
 
 
-def setState(new_state):
+def setDialog(new_state):
     state["menu_open"] = new_state
     state["update"].append("table")
 
