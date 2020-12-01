@@ -439,12 +439,13 @@ def createTable(table_container):
                             updated_selected.append(index)
 
                         state["update"].append("table")
-                        print(state["selected"])
+                        state["update"].append("footer")
+                        print(state["update"])
 
+                    # Selection Checkbox
                     checkbox_text = u"\u25A3" if selected else u"\u25A1"
                     checkbox_color = SELECTED_BG if selected else PRIMARY_FG
 
-                    # Selection Checkbox
                     cell = tk.Label(
                         row,
                         text=checkbox_text,
@@ -452,7 +453,7 @@ def createTable(table_container):
                         width=cell_width[index],
                         background=PRIMARY_BG)
 
-                    # bind clicke event to label using closures
+                    # Bind click event to label using closures
                     cell.bind("<Button-1>",
                               lambda event, ind=tab_index: toggleSelect(ind))
 
@@ -475,33 +476,45 @@ def createTable(table_container):
         table_container.grid_columnconfigure(0, weight=1)
         table_container.grid_rowconfigure(0, weight=1)
 
-    def listeningState():
-        if "table" in state["update"]:
-            state["update"].remove("table")
-            table_container.destroy()
-            updated_table_container = tk.Frame(display, height=400, width=1050)
-            createTable(updated_table_container)
-
-        if (state["menu_open"]):
-            createDialog(state["menu_open"])
-
-        window.after(100, listeningState)
-
-    listeningState()
-
 
 createTable(table_container)
 
 
 # --------------------------------- Footer -------------------------------------
-def createFooter():
-    footer = tk.Frame(display, height=32, width=1050, bg=PRIMARY_BG)
-    footer.grid(row=2, column=0)
-    footer.grid_propagate(False)
+footer_container = tk.Frame(
+    display, height=32, width=1050, background=PRIMARY_BG)
 
+
+def createFooter(footer_container):
+    footer_container.grid(row=2, column=0)
+    footer_container.grid_propagate(False)
+
+# ------------------------------- Filter Info -----------------------------------
     filter_info_frame = tk.Frame(
-        footer, width=880, height=32, background=PRIMARY_BG)
+        footer_container, width=440, height=32, background=PRIMARY_BG)
     filter_info_frame.grid(row=0, column=0)
+
+# ----------------------------- Selection Info ----------------------------------
+    selection_info_frame = tk.Frame(
+        footer_container, width=440, height=32)
+    selection_info_frame.grid(row=0, column=1)
+    selection_info_frame.propagate(False)
+    selection_info_frame.grid_columnconfigure(0, minsize=440)
+
+    selected_num = len(state["selected"])
+    selection_text = f"Selected: [ {selected_num} | {len(students)} ]"
+    selection_label = tk.Label(
+        selection_info_frame,
+        text=selection_text,
+        background=PRIMARY_BG,
+        foreground=PRIMARY_FG,
+        anchor=tk.W)
+    selection_label.grid(row=0, column=0, sticky=tk.NSEW)
+    selection_label.propagate(False)
+
+
+# ----------------------------- Pagination Info ---------------------------------
+
 
     def paginationForward(direction):
         if direction == "+" and state["curr_page"] < state["total_pages"]:
@@ -511,12 +524,13 @@ def createFooter():
             state["curr_page"] = state["curr_page"] - 1
 
         state["update"].append("table")
-        footer.destroy()
+        footer_container.destroy()
         createFooter()
 
+    # Pagination Control
     pagination_frame = tk.Frame(
-        footer, width=160, height=32, background=PRIMARY_BG)
-    pagination_frame.grid(row=0, column=1)
+        footer_container, width=160, height=32, background=PRIMARY_BG)
+    pagination_frame.grid(row=0, column=2)
     pagination_frame.grid_propagate(False)
 
     pagination_label1 = tk.Label(
@@ -542,7 +556,32 @@ def createFooter():
     print(len(students))
 
 
-createFooter()
+createFooter(footer_container)
+
+# State Listener
+
+
+def listeningState():
+    if "table" in state["update"]:
+        state["update"].remove("table")
+        table_container.destroy()
+        updated_table_container = tk.Frame(display, height=400, width=1050)
+        createTable(updated_table_container)
+
+    if "footer" in state["update"]:
+        state["update"].remove("footer")
+        footer_container.destroy()
+        updated_footer_containter = tk.Frame(
+            display, height=32, width=1050, background=PRIMARY_BG)
+        createFooter(updated_footer_containter)
+
+    if (state["menu_open"]):
+        createDialog(state["menu_open"])
+
+    window.after(100, listeningState)
+
+
+listeningState()
 
 
 def setDialog(new_state):
