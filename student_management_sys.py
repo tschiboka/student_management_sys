@@ -58,9 +58,9 @@ WIN_WIDTH = 1200
 WIN_HEIGHT = 450
 TABLE_ROWS = 10
 BUTTONS = ["Search", "Filter", "Sort", "New",
-           "Modify", "Insert", "Delete", "Exit"]
+           "Modify", "Insert", "Delete", "Selection", "Exit"]
 CAPTION_NAMES = ["First Name", "Last Name",
-                 "Phone", "Subjects", "DOB", "Email", u"\u2713"]
+                 "Phone", "Subjects", "DOB", "Email", " "]
 SUBJECTS = {
     "MA": "Maths",
     "CH": "Chemistry",
@@ -243,7 +243,7 @@ def renderSearchDialog():
         width=400,
         background=PRIMARY_BG)
     search_frame.place(bordermode=tk.INSIDE, x=150, y=0)
-    search_frame.grid_columnconfigure(0, minsize=400)
+    search_frame.grid_columnconfigure(0, minsize=370)
 
     # Search dialog header
     search_header_frame = tk.Frame(
@@ -283,7 +283,7 @@ def renderSearchDialog():
         search_form_frame, textvariable=email_value)
     search_form_email_input.grid(row=1, column=0, pady=5)
 
-    # Serach dialog email label
+    # Search dialog email label
     search_form_email_btn = DialogButton(
         search_form_frame, text="Email",
         command=lambda: submit_search("email", email_value, search_frame)
@@ -291,10 +291,85 @@ def renderSearchDialog():
     search_form_email_btn.grid(row=1, column=1, sticky=tk.NSEW, pady=5)
 
 
+# ---------------------------- Selection Functions ----------------------------
+def selectionMethod(method):
+    if method == "all":
+        updatedSelection = list(range(len(students)))
+    if method == "none":
+        updatedSelection = []
+    if method == "inverse":
+        all_elements = list(range(len(students)))
+        updatedSelection = list(filter(
+            lambda ind: ind not in state["selected"], all_elements))
+
+    state["selected"] = updatedSelection
+    state["update"].append("table")
+    state["update"].append("footer")
+
+# ---------------------------- Selection Dialog Box ---------------------------
+
+
+def renderSelectionDialog():
+    # Select Dialog Frame
+    selection_frame = tk.Frame(window, width=400, background=PRIMARY_BG)
+    selection_frame.place(bordermode=tk.INSIDE, x=150, y=195)
+    selection_frame.propagate(False)
+
+    # Select Header
+    selection_header = tk.Frame(selection_frame)
+    selection_header.grid(row=0, column=0)
+    selection_header.grid_columnconfigure(0, minsize=400)
+
+    # Select Header Label
+    selection_header_label = DialogLabel(
+        selection_header, text="Manage Selection")
+    selection_header_label.grid(row=0, column=0, sticky=tk.NSEW)
+
+    # Select Close Button
+    selection_close_btn = CloseButton(
+        selection_header,
+        command=lambda: selection_frame.destroy())
+    selection_close_btn.grid(row=0, column=1)
+
+    # Select Options Frame
+    selection_options_frame = tk.Frame(
+        selection_frame,
+        background=PRIMARY_BG,
+        width=400,
+        pady=10)
+    selection_options_frame.grid(row=1, column=0)
+
+    # Select All Button
+    select_all_btn = DialogButton(
+        selection_options_frame,
+        text="Select All",
+        width=14,
+        command=lambda: selectionMethod("all"))
+    select_all_btn.grid(row=0, column=0, padx=5)
+
+    # Deselect All Button
+    deselect_all_btn = DialogButton(
+        selection_options_frame,
+        text="Deselect All",
+        width=14,
+        command=lambda: selectionMethod("none"))
+    deselect_all_btn.grid(row=0, column=1, padx=5)
+
+    # Inverse Selection Button
+    select_inverse_btn = DialogButton(
+        selection_options_frame,
+        text="Inverse Selection",
+        width=14,
+        command=lambda: selectionMethod("inverse"))
+    select_inverse_btn.grid(row=0, column=2, padx=5)
+
+
 def createDialog(dialog_name):
     print(dialog_name)
     if (dialog_name == "Search"):
         renderSearchDialog()
+    if (dialog_name == "Selection"):
+        renderSelectionDialog()
 
     state["menu_open"] = None  # ---- Reset state so listener does not re-paint
 
@@ -377,6 +452,7 @@ def createTable(table_container):
             caption,
             width=cell_width[index],
             text=c_name,
+            anchor=tk.W,
             background=PRIMARY_BG,
             foreground=PRIMARY_FG)
         cap.grid(row=0, column=index)
@@ -440,7 +516,6 @@ def createTable(table_container):
                 sub_text = "".join(subs)
 
                 details = f"{f_name}\n{l_name}\n{dob}\n{phone}\n{email}\nSubjects      :{sub_text}"
-
                 messagebox.showinfo("Student Details", details)
 
             # Iterate cells
@@ -451,7 +526,8 @@ def createTable(table_container):
                         row,
                         width=cell_width[index],
                         background=background,
-                        text=entry)
+                        text=entry,
+                        anchor=tk.W)
                     cell.bind("<Button 1>", lambda event,
                               ind=tab_index: showStudentInfoDetails(ind))
                 else:
@@ -540,7 +616,7 @@ def createFooter(footer_container):
 # ----------------------------- Pagination Info ---------------------------------
 
 
-    def paginationForward(direction):
+    def paginate(direction):
         if direction == "+" and state["curr_page"] < state["total_pages"]:
             state["curr_page"] = state["curr_page"] + 1
 
@@ -548,8 +624,8 @@ def createFooter(footer_container):
             state["curr_page"] = state["curr_page"] - 1
 
         state["update"].append("table")
+        state["update"].append("footer")
         footer_container.destroy()
-        createFooter()
 
     # Pagination Control
     pagination_frame = tk.Frame(
@@ -562,7 +638,7 @@ def createFooter(footer_container):
     pagination_label1.grid(row=0, column=0)
 
     pagination_backwards_btn = DialogButton(
-        pagination_frame, text="<", width=2, command=lambda: paginationForward("-"))
+        pagination_frame, text="<", width=2, command=lambda: paginate("-"))
     pagination_backwards_btn.grid(row=0, column=1)
 
     pagination_label2 = tk.Label(
@@ -570,7 +646,7 @@ def createFooter(footer_container):
     pagination_label2.grid(row=0, column=2)
 
     pagination_forward_btn = DialogButton(
-        pagination_frame, text=">", width=2, command=lambda: paginationForward("+"))
+        pagination_frame, text=">", width=2, command=lambda: paginate("+"))
     pagination_forward_btn.grid(row=0, column=3)
 
     pagination_label3 = tk.Label(
