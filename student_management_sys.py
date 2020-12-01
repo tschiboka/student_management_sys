@@ -46,6 +46,8 @@ students = getCSVTable("students.csv")
 state = {
     "menu_open": None,
     "update": [],
+    "total_pages": 1,
+    "curr_page": 1
 }
 
 
@@ -400,6 +402,39 @@ createTable(table_container)
 footer = tk.Frame(display, height=32, width=1050, bg=PRIMARY_BG)
 footer.grid(row=2, column=0)
 footer.grid_propagate(False)
+
+
+def createFooter():
+    filter_info_frame = tk.Frame(
+        footer, width=905, height=32, background=PRIMARY_BG)
+    filter_info_frame.grid(row=0, column=0)
+
+    pagination_frame = tk.Frame(
+        footer, width=145, height=32, background=PRIMARY_BG)
+    pagination_frame.grid(row=0, column=1)
+    pagination_frame.grid_propagate(False)
+
+    pagination_label1 = tk.Label(
+        pagination_frame, text="Page: ", width=5, background=PRIMARY_BG, foreground=PRIMARY_FG)
+    pagination_label1.grid(row=0, column=0)
+
+    pagination_backwards_btn = DialogButton(
+        pagination_frame, text="<", width=2)
+    pagination_backwards_btn.grid(row=0, column=1)
+
+    pagination_label2 = tk.Label(
+        pagination_frame, text=state["curr_page"], width=3, background=PRIMARY_BG, foreground=PRIMARY_FG)
+    pagination_label2.grid(row=0, column=2)
+
+    pagination_forward_btn = DialogButton(pagination_frame, text=">", width=2)
+    pagination_forward_btn.grid(row=0, column=3)
+
+    pagination_label3 = tk.Label(
+        pagination_frame, text=state["total_pages"], width=3, background=PRIMARY_BG, foreground=PRIMARY_FG)
+    pagination_label3.grid(row=0, column=4)
+
+
+createFooter()
 
 
 def setDialog(new_state):
