@@ -16,19 +16,25 @@
 import tkinter as tk
 import csv
 
-# Student List
-students = []
-with open('names.csv', newline='') as csvfile:
-    reader = csv.DictReader(csvfile)
-    for row in reader:
-        students.append({
-            "f_name": row["f_name"],
-            "l_name": row["l_name"],
-            "phone": row["phone"],
-            "subjects": row["subjects"],
-            "dob": row["dob"],
-            "email": row["email"]})
-print(students)
+# ---------------------------- Get Students From CSV ---------------------------
+
+
+def getCSVTable(path):
+    with open(path, newline='') as csvfile:
+        table = []
+        buffer = csv.DictReader(csvfile)
+        for row in buffer:
+            table.append({
+                "f_name": row["f_name"],
+                "l_name": row["l_name"],
+                "phone": row["phone"],
+                "subjects": row["subjects"],
+                "dob": row["dob"],
+                "email": row["email"]})
+    return table
+
+
+students = getCSVTable("students.csv")
 
 # ---------------------------------- App State ---------------------------------
 # -       menu_open: the currently opened dialog eg: menu_open = "Search"      -
@@ -177,8 +183,8 @@ class DialogLabel(tk.Label):
 # ------------------------------- Search by Phone  -----------------------------
 def submit_search_by_phone(phone_value):
     value = phone_value.get()
-#    student = [*filter(lambda student: student.phone == phone_value, students)]
-#    print(student)
+    student = filter(
+        lambda student: student["phone"] == value, students)
 
 
 # ------------------------------ Search Dialog Box -----------------------------
