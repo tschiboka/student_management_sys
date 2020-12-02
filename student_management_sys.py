@@ -99,7 +99,16 @@ LRG_FONT = 12
 MID_FONT = 10
 SML_FONT = 9
 
-# --------------------------- Component Declarations ----------------------------
+# -------------------------------- Global Frames -------------------------------
+new_frame = None
+modify_frame = None
+delete_frame = None
+filter_frame = None
+search_frame = None
+sort_frame = None
+selection_frame = None
+
+# --------------------------- Component Declarations ---------------------------
 # -                  for custom widget settings like hover                     -
 # -                as Tkinter has no such built in functionality               -
 # ------------------------------------------------------------------------------
@@ -147,7 +156,7 @@ class DialogButton(tk.Button):
             activeforeground=ACTIVE_FG,
             borderwidth=1,
             relief=tk.RIDGE,
-            font=MID_FONT,
+            font=(None, MID_FONT),
             justify=tk.CENTER,
             anchor=tk.CENTER,
             cursor="hand2",
@@ -179,7 +188,7 @@ class CloseButton(tk.Button):
             activeforeground="#FF1439",
             borderwidth=1,
             relief=tk.RIDGE,
-            font=14,
+            font=(None, LRG_FONT),
             text=u"\u00D7",
             justify=tk.CENTER,
             anchor=tk.CENTER,
@@ -205,9 +214,8 @@ class DialogInput(tk.Entry):
             master=master,
             background="#ddd",
             foreground=PRIMARY_BG,
-            font=MID_FONT,
+            font=(None, MID_FONT),
             relief=tk.FLAT,
-            justify=tk.LEFT,
             ** kw)
 
 
@@ -221,9 +229,7 @@ class DialogLabel(tk.Label):
             master=master,
             background=PRIMARY_BG,
             foreground=PRIMARY_FG,
-            font=MID_FONT,
-            justify=tk.CENTER,
-            anchor=tk.CENTER,
+            font=(None, MID_FONT),
             ** kw)
 
 
@@ -252,6 +258,7 @@ def submit_search(prop, value, dialog):
 
 
 def renderSearchDialog():
+    global search_frame
     # Search dialog container
     search_frame = tk.Frame(
         window,
@@ -389,6 +396,7 @@ def submitFilter(filter_by_values, dialog):
 
 
 def renderFilterDialog():
+    global filter_frame
     # Filter Dialog Container
     filter_frame = tk.Frame(
         window,
@@ -507,7 +515,7 @@ def renderFilterDialog():
             width=50,
             justify=tk.LEFT,
             anchor=tk.W)
-        filter_subj_label.grid(row=index, column=0, sticky="W")
+        filter_subj_label.grid(row=index, column=0, sticky=tk.W)
 
         filter_subj_btn = tk.Checkbutton(
             filter_subject_frame,
@@ -515,7 +523,7 @@ def renderFilterDialog():
             background=PRIMARY_BG,
             foreground=ACTIVE_FG,
             activebackground=PRIMARY_BG)
-        filter_subj_btn.grid(row=index, column=1, sticky="E")
+        filter_subj_btn.grid(row=index, column=1, sticky=tk.E)
 
     # Filter Dialog Submit Button
     filter_by_values = [f_name_var, l_name_var,
@@ -550,6 +558,7 @@ def sortMethod(method, dialog):
 
 # ------------------------------ Sort Dialog Box ------------------------------
 def renderSortDialog():
+    global sort_frame
     # Sort Dialog Frame
     sort_frame = tk.Frame(window, width=400, background=PRIMARY_BG)
     sort_frame.place(bordermode=tk.INSIDE, x=150, y=138)
@@ -626,6 +635,7 @@ def selectionMethod(method):
 
 
 def renderSelectionDialog():
+    global selection_frame
     # Select Dialog Frame
     selection_frame = tk.Frame(window, width=400, background=PRIMARY_BG)
     selection_frame.place(bordermode=tk.INSIDE, x=150, y=167)
@@ -682,50 +692,274 @@ def renderSelectionDialog():
 
 # -------------------------------- New Dialog Box --------------------------------
 def renderNewDialog():
+    global new_frame
     # New Dialog Container
     new_frame = tk.Frame(
         window,
         width=400,
         background=PRIMARY_BG)
     new_frame.place(bordermode=tk.INSIDE, x=150, y=0)
-    new_frame.grid_columnconfigure(0, minsize=400)
 
     # New Dialog Header
     new_header_frame = tk.Frame(
         new_frame, background=PRIMARY_BG)
     new_header_frame.grid(row=0, column=0)
+    new_header_frame.grid_columnconfigure(0, minsize=370)
 
     new_header_label = DialogLabel(
         new_header_frame, text="Create Student Record")
-    new_header_label.grid(row=0, column=0, padx=10)
+    new_header_label.grid(row=0, column=0)
 
     # New Dialog Close Button
     new_close_btn = CloseButton(
-        new_frame, command=lambda: new_frame.destroy())
-    new_close_btn.grid(row=0, column=1)
+        new_header_frame, command=lambda: new_frame.destroy())
+    new_close_btn.grid(row=0, column=1, sticky=tk.E)
+
+    # New Dialog Separator 1
+    new_separator_1 = tk.Frame(new_header_frame, bg="#444", height=1)
+    new_separator_1.grid(row=1, column=0, sticky=tk.EW,
+                         columnspan=2, pady=(0, 2))
 
     # New Dialog Body
     new_body = tk.Frame(new_frame, background=PRIMARY_BG)
     new_body.grid(row=1, column=0)
     new_body.grid_columnconfigure(0, minsize=200)
+    new_body.grid_columnconfigure(1, minsize=200)
+    new_body.grid_rowconfigure(0, minsize=30)
+    new_body.grid_rowconfigure(1, minsize=30)
+    new_body.grid_rowconfigure(3, minsize=30)
+    new_body.grid_rowconfigure(4, minsize=30)
+    new_body.grid_rowconfigure(6, minsize=30)
+    new_body.grid_rowconfigure(8, minsize=30)
+    new_body.grid_rowconfigure(9, minsize=30)
+    new_body.grid_rowconfigure(10, minsize=30)
+    new_body.grid_rowconfigure(11, minsize=30)
+    new_body.grid_rowconfigure(12, minsize=30)
+    new_body.grid_rowconfigure(13, minsize=30)
+    new_body.grid_rowconfigure(15, minsize=30)
 
     # New Dialog First Name Label
     new_f_name_label = DialogLabel(
         new_body, text="First Name")
-    new_f_name_label.grid(row=-0, column=0)
+    new_f_name_label.grid(row=-0, column=0, sticky=tk.W)
 
     # New Dialog First Name Input
     new_f_name_input = DialogInput(new_body)
-    new_f_name_input.grid(row=0, column=1)
+    new_f_name_input.grid(row=0, column=1, sticky=tk.EW, padx=(0, 4))
 
     # New Dialog Last Name Label
     new_l_name_label = DialogLabel(
         new_body, text="Last Name")
-    new_l_name_label.grid(row=1, column=0)
+    new_l_name_label.grid(row=1, column=0, sticky=tk.W)
 
     # New Dialog Last Name Input
     new_l_name_input = DialogInput(new_body)
-    new_l_name_input.grid(row=1, column=1)
+    new_l_name_input.grid(row=1, column=1, sticky=tk.EW, padx=(0, 4))
+
+    # New Dialog Separator 2
+    new_separator_2 = tk.Frame(new_body, bg="#444", height=1)
+    new_separator_2.grid(row=2, column=0, sticky=tk.EW,
+                         columnspan=2, pady=2)
+
+    # New Dialog Phone Number Label
+    new_phone_label = DialogLabel(
+        new_body, text="Phone Number")
+    new_phone_label.grid(row=3, column=0, sticky=tk.W)
+
+    # New Dialog Phone Number Input
+    new_phone_input = DialogInput(new_body)
+    new_phone_input.grid(row=3, column=1, sticky=tk.EW, padx=(0, 4))
+
+    # New Dialog Email Label
+    new_email_label = DialogLabel(
+        new_body, text="Email")
+    new_email_label.grid(row=4, column=0, sticky=tk.W)
+
+    # New Dialog Email Input
+    new_email_input = DialogInput(new_body)
+    new_email_input.grid(row=4, column=1, sticky=tk.EW, padx=(0, 4))
+
+    # New Dialog Separator 3
+    new_separator_3 = tk.Frame(new_body, bg="#444", height=1)
+    new_separator_3.grid(row=5, column=0, sticky=tk.EW,
+                         columnspan=2, pady=(2, 4))
+
+    # New Dialog DOB  Label
+    new_dob_label = DialogLabel(
+        new_body, text="Date of Birth")
+    new_dob_label.grid(row=6, column=0, sticky=tk.W)
+
+    # New Dialog DOB Input Frame
+    new_dob_input_frame = tk.Frame(new_body, background=PRIMARY_BG)
+    new_dob_input_frame.grid(row=6, column=1, sticky=tk.E)
+    new_dob_input_frame.grid_columnconfigure(0, minsize=67, weight=1)
+    new_dob_input_frame.grid_columnconfigure(1, minsize=66, weight=1)
+    new_dob_input_frame.grid_columnconfigure(2, minsize=67, weight=1)
+
+    # New Dialog DOB Day Input
+    new_dob_day_input = DialogInput(
+        new_dob_input_frame, width=2, justify=tk.CENTER)
+    new_dob_day_input.grid(row=0, column=0, sticky=tk.EW, padx=(0, 4))
+
+    # New Dialog DOB Month Input
+    new_dob_month_input = DialogInput(
+        new_dob_input_frame, width=2, justify=tk.CENTER)
+    new_dob_month_input.grid(row=0, column=1, sticky=tk.EW, padx=4)
+
+    # New Dialog DOB Year Input
+    new_dob_year_input = DialogInput(
+        new_dob_input_frame, width=2, justify=tk.CENTER)
+    new_dob_year_input.grid(row=0, column=2, sticky=tk.EW, padx=4)
+
+    # New Dialog Separator 4
+    new_separator_4 = tk.Frame(new_body, bg="#444", height=1)
+    new_separator_4.grid(row=7, column=0, sticky=tk.EW,
+                         columnspan=2, pady=(4, 2))
+
+    # New Dialog Subjects Label
+    new_subjects_label = DialogLabel(
+        new_body, text="Select 4 Subjects")
+    new_subjects_label.grid(row=8, column=0, sticky=tk.W)
+
+    # New Dialog Subject Row 0 Col 0 SUBJECT 0
+    new_subject_r0_c0 = tk.Frame(new_body, width=200, background=PRIMARY_BG)
+    new_subject_r0_c0.grid(row=9, column=0)
+    new_subject_r0_c0.grid_columnconfigure(0, minsize=170)
+    new_subject_r0_c0.grid_columnconfigure(1, minsize=30)
+    new_subject_0_label = DialogLabel(new_subject_r0_c0, text="[BI] Biology")
+    new_subject_0_label.grid(row=0, column=0, sticky=tk.W)
+    new_subject_0_check = tk.Checkbutton(
+        new_subject_r0_c0,
+        background=PRIMARY_BG, foreground=ACTIVE_FG, activebackground=PRIMARY_BG)
+    new_subject_0_check.grid(row=0, column=1, sticky=tk.E)
+
+    # New Dialog Subject Row 0 Col 1 SUBJECT 1
+    new_subject_r0_c1 = tk.Frame(new_body, width=200, background=PRIMARY_BG)
+    new_subject_r0_c1.grid(row=9, column=1)
+    new_subject_r0_c1.grid_columnconfigure(0, minsize=170)
+    new_subject_r0_c1.grid_columnconfigure(1, minsize=30)
+    new_subject_1_label = DialogLabel(new_subject_r0_c1, text="[HI] History")
+    new_subject_1_label.grid(row=0, column=0, sticky=tk.W)
+    new_subject_1_check = tk.Checkbutton(
+        new_subject_r0_c1,
+        background=PRIMARY_BG, foreground=ACTIVE_FG, activebackground=PRIMARY_BG)
+    new_subject_1_check.grid(row=0, column=1, sticky=tk.E)
+
+    # New Dialog Subject Row 1 Col 0 SUBJECT 2
+    new_subject_r1_c0 = tk.Frame(new_body, width=200, background=PRIMARY_BG)
+    new_subject_r1_c0.grid(row=10, column=0)
+    new_subject_r1_c0.grid_columnconfigure(0, minsize=170)
+    new_subject_r1_c0.grid_columnconfigure(1, minsize=30)
+    new_subject_2_label = DialogLabel(new_subject_r1_c0, text="[CH] Chemistry")
+    new_subject_2_label.grid(row=0, column=0, sticky=tk.W)
+    new_subject_2_check = tk.Checkbutton(
+        new_subject_r1_c0,
+        background=PRIMARY_BG, foreground=ACTIVE_FG, activebackground=PRIMARY_BG)
+    new_subject_2_check.grid(row=0, column=1, sticky=tk.E)
+
+    # New Dialog Subject Row 1 Col 1 SUBJECT 3
+    new_subject_r1_c1 = tk.Frame(new_body, width=200, background=PRIMARY_BG)
+    new_subject_r1_c1.grid(row=10, column=1)
+    new_subject_r1_c1.grid_columnconfigure(0, minsize=170)
+    new_subject_r1_c1.grid_columnconfigure(1, minsize=30)
+    new_subject_3_label = DialogLabel(
+        new_subject_r1_c1, text="[IT] Information Techonlogy")
+    new_subject_3_label.grid(row=0, column=0, sticky=tk.W)
+    new_subject_3_check = tk.Checkbutton(
+        new_subject_r1_c1,
+        background=PRIMARY_BG, foreground=ACTIVE_FG, activebackground=PRIMARY_BG)
+    new_subject_3_check.grid(row=0, column=1, sticky=tk.E)
+
+    # New Dialog Subject Row 2 Col 0 SUBJECT 4
+    new_subject_r2_c0 = tk.Frame(new_body, width=200, background=PRIMARY_BG)
+    new_subject_r2_c0.grid(row=11, column=0)
+    new_subject_r2_c0.grid_columnconfigure(0, minsize=170)
+    new_subject_r2_c0.grid_columnconfigure(1, minsize=30)
+    new_subject_4_label = DialogLabel(new_subject_r2_c0, text="[EN] English")
+    new_subject_4_label.grid(row=0, column=0, sticky=tk.W)
+    new_subject_4_check = tk.Checkbutton(
+        new_subject_r2_c0,
+        background=PRIMARY_BG, foreground=ACTIVE_FG, activebackground=PRIMARY_BG)
+    new_subject_4_check.grid(row=0, column=1, sticky=tk.E)
+
+    # New Dialog Subject Row 2 Col 1 SUBJECT 5
+    new_subject_r2_c1 = tk.Frame(new_body, width=200, background=PRIMARY_BG)
+    new_subject_r2_c1.grid(row=11, column=1)
+    new_subject_r2_c1.grid_columnconfigure(0, minsize=170)
+    new_subject_r2_c1.grid_columnconfigure(1, minsize=30)
+    new_subject_5_label = DialogLabel(
+        new_subject_r2_c1, text="[MA] Maths")
+    new_subject_5_label.grid(row=0, column=0, sticky=tk.W)
+    new_subject_5_check = tk.Checkbutton(
+        new_subject_r2_c1,
+        background=PRIMARY_BG, foreground=ACTIVE_FG, activebackground=PRIMARY_BG)
+    new_subject_5_check.grid(row=0, column=1, sticky=tk.E)
+
+    # New Dialog Subject Row 3 Col 0 SUBJECT 6
+    new_subject_r3_c0 = tk.Frame(new_body, width=200, background=PRIMARY_BG)
+    new_subject_r3_c0.grid(row=12, column=0)
+    new_subject_r3_c0.grid_columnconfigure(0, minsize=170)
+    new_subject_r3_c0.grid_columnconfigure(1, minsize=30)
+    new_subject_6_label = DialogLabel(
+        new_subject_r3_c0, text="[FL] Foreign Language")
+    new_subject_6_label.grid(row=0, column=0, sticky=tk.W)
+    new_subject_6_check = tk.Checkbutton(
+        new_subject_r3_c0,
+        background=PRIMARY_BG, foreground=ACTIVE_FG, activebackground=PRIMARY_BG)
+    new_subject_6_check.grid(row=0, column=1, sticky=tk.E)
+
+    # New Dialog Subject Row 3 Col 1 SUBJECT 7
+    new_subject_r3_c1 = tk.Frame(new_body, width=200, background=PRIMARY_BG)
+    new_subject_r3_c1.grid(row=12, column=1)
+    new_subject_r3_c1.grid_columnconfigure(0, minsize=170)
+    new_subject_r3_c1.grid_columnconfigure(1, minsize=30)
+    new_subject_7_label = DialogLabel(
+        new_subject_r3_c1, text="[PH] Physics")
+    new_subject_7_label.grid(row=0, column=0, sticky=tk.W)
+    new_subject_7_check = tk.Checkbutton(
+        new_subject_r3_c1,
+        background=PRIMARY_BG, foreground=ACTIVE_FG, activebackground=PRIMARY_BG)
+    new_subject_7_check.grid(row=0, column=1, sticky=tk.E)
+
+    # New Dialog Subject Row 3 Col 0 SUBJECT 8
+    new_subject_r4_c0 = tk.Frame(new_body, width=200, background=PRIMARY_BG)
+    new_subject_r4_c0.grid(row=13, column=0)
+    new_subject_r4_c0.grid_columnconfigure(0, minsize=170)
+    new_subject_r4_c0.grid_columnconfigure(1, minsize=30)
+    new_subject_8_label = DialogLabel(
+        new_subject_r4_c0, text="[GE] Geography")
+    new_subject_8_label.grid(row=0, column=0, sticky=tk.W)
+    new_subject_8_check = tk.Checkbutton(
+        new_subject_r4_c0,
+        background=PRIMARY_BG, foreground=ACTIVE_FG, activebackground=PRIMARY_BG)
+    new_subject_8_check.grid(row=0, column=1, sticky=tk.E)
+
+    # New Dialog Subject Row 3 Col 1 SUBJECT 9
+    new_subject_r4_c1 = tk.Frame(new_body, width=200, background=PRIMARY_BG)
+    new_subject_r4_c1.grid(row=13, column=1)
+    new_subject_r4_c1.grid_columnconfigure(0, minsize=170)
+    new_subject_r4_c1.grid_columnconfigure(1, minsize=30)
+    new_subject_9_label = DialogLabel(
+        new_subject_r4_c1, text="[PR] Programming")
+    new_subject_9_label.grid(row=0, column=0, sticky=tk.W)
+    new_subject_9_check = tk.Checkbutton(
+        new_subject_r4_c1,
+        background=PRIMARY_BG, foreground=ACTIVE_FG, activebackground=PRIMARY_BG)
+    new_subject_9_check.grid(row=0, column=1, sticky=tk.E)
+
+    # New Dialog Separator 5
+    new_separator_4 = tk.Frame(new_body, bg="#444", height=1)
+    new_separator_4.grid(row=14, column=0, sticky=tk.EW,
+                         columnspan=2, pady=(4, 2))
+
+    # New Dialog Submit Button
+    new_submit = DialogButton(new_body, text="Submit", width=10)
+    new_submit.grid(row=15, column=0, columnspan=2)
+
+    # New Dialog Separator 6
+    new_separator_4 = tk.Frame(new_body, bg="#444", height=1)
+    new_separator_4.grid(row=16, column=0, sticky=tk.EW,
+                         columnspan=2, pady=(4, 2))
 
 
 def createDialog(dialog_name):
@@ -1048,7 +1282,6 @@ def createFooter(footer_container):
 
 # ----------------------------- Pagination Info ---------------------------------
 
-
     def paginate(direction):
         if direction == "+" and state["curr_page"] < state["total_pages"]:
             state["curr_page"] = state["curr_page"] + 1
@@ -1064,6 +1297,7 @@ def createFooter(footer_container):
     pagination_frame = tk.Frame(
         footer_container, width=160, height=32, background=PRIMARY_BG)
     pagination_frame.grid(row=0, column=3)
+    pagination_frame.grid_rowconfigure(0, minsize=32)
     pagination_frame.grid_propagate(False)
 
     pagination_label1 = tk.Label(
@@ -1093,6 +1327,8 @@ createFooter(footer_container)
 
 
 def listeningState():
+    # close open dialogs
+
     if "table" in state["update"]:
         state["update"].remove("table")
         table_container.destroy()
@@ -1107,6 +1343,12 @@ def listeningState():
         createFooter(updated_footer_containter)
 
     if (state["menu_open"]):
+        dialogs = [new_frame, modify_frame, delete_frame,
+                   filter_frame, search_frame, sort_frame, selection_frame]
+        for dialog in dialogs:
+            if dialog:
+                dialog.destroy()
+
         createDialog(state["menu_open"])
 
     window.after(100, listeningState)
