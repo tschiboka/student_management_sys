@@ -49,7 +49,8 @@ state = {
     "update": [],
     "total_pages": 1,
     "curr_page": 1,
-    "selected": []
+    "selected": [],
+    "filtered": None,
 }
 
 
@@ -293,11 +294,87 @@ def renderSearchDialog():
 
 
 # --------------------------- Filter Submit Function --------------------------
-def submitFilter():
-    print("FILTER")
+def submitFilter(filter_by_values, dialog):
+    # Extracting Values from Filter Dialogbox
+    f_name = filter_by_values[0].get()
+    l_name = filter_by_values[1].get()
+    day = filter_by_values[2].get()
+    month = filter_by_values[3].get()
+    year = filter_by_values[4].get()
 
+    def getSubjects(i, val):
+        abbrs = ["MA", "CH", "BI", "IT", "PH", "GE", "EN", "FL", "HI", "PR"]
+        if val:
+            return abbrs[i]
+
+    subjects_inp = list(map(lambda el: el.get(), filter_by_values[5]))
+    subjects = list(map(lambda x: getSubjects(
+        x[0], x[1]), enumerate(subjects_inp)))
+    subjects = list(filter(lambda x: x, subjects))
+
+    # Validating inputs (basic validation)
+    if day and (not day.isdigit() or int(day) > 31 or int(day) < 1 and float(day) % 1 != 0):
+        messagebox.showinfo(
+            "Input Error", "Day must be an integer between 1 and 31")
+
+    if month and (not month.isdigit() or int(month) > 12 or int(month) < 1 and float(month) % 1 != 0):
+        messagebox.showinfo(
+            "Input Error", "Day must be an integer between 1 and 12")
+
+    if year and (not year.isdigit() or int(year) > 99 or int(year) < 1 and float(year) % 1 != 0):
+        messagebox.showinfo(
+            "Input Error", "Year must be an integer between 1 and 12")
+
+    # Filter students
+
+    def filter_function(student):
+        if f_name and str.upper(f_name) == str.upper(student["f_name"]):
+            return True
+
+        if l_name and str.upper(l_name) == str.upper(student["l_name"]):
+            return True
+
+        [s_day, s_month, s_year] = student["dob"].split(".")
+        # if day, month and year is given it needs to match all
+        if day and month and year:
+            if (int(s_day) == int(day) and int(s_month) == int(month) and int(s_year) == int(year)):
+                return True
+        else:
+            if day and int(s_day) == int(day):
+                return True
+            if month and int(s_month) == int(month):
+                return True
+            if year and int(s_year) == int(year):
+                return True
+
+        if len(subjects):
+            student_subjects = [student["subjects"][i:i + 2]
+                                for i in range(0, len(student["subjects"]), 2)]
+            subject_matches = set(subjects) - \
+                (set(subjects) - set(student_subjects))
+            if len(subject_matches):
+                return True
+        return False
+
+    global students
+    oldlength = len(students)
+    filtered_students = list(filter(filter_function, students))
+
+    if len(filtered_students):
+        students = filtered_students
+        state["update"].append("table")
+        state["update"].append("footer")
+        state["selected"] = []
+        state["filtered"] = [len(students), oldlength]
+        print(state["filtered"])
+        dialog.destroy()
+    else:
+        messagebox.showinfo(
+            "Warning", "Filtering has no result!")
 
 # ----------------------------- Filter Dialog Box -----------------------------
+
+
 def renderFilterDialog():
     # Filter Dialog Container
     filter_frame = tk.Frame(
@@ -341,7 +418,9 @@ def renderFilterDialog():
         anchor=tk.W)
     filter_f_name_label.grid(row=0, column=0, sticky=tk.W)
 
-    filter_f_name_input = DialogInput(filter_f_name_frame, width=20)
+    f_name_var = tk.StringVar()
+    filter_f_name_input = DialogInput(
+        filter_f_name_frame, width=20, textvariable=f_name_var)
     filter_f_name_input.grid(row=0, column=1, pady=2)
 
     # Filter Dialog Last Name
@@ -359,7 +438,9 @@ def renderFilterDialog():
         anchor=tk.W)
     filter_l_name_label.grid(row=0, column=0)
 
-    filter_l_name_input = DialogInput(filter_l_name_frame, width=20)
+    l_name_var = tk.StringVar()
+    filter_l_name_input = DialogInput(
+        filter_l_name_frame, width=20, textvariable=l_name_var)
     filter_l_name_input.grid(row=0, column=1)
 
     # Filter Dialog Date of Birth
@@ -378,15 +459,21 @@ def renderFilterDialog():
     filter_dob_label.grid(row=0, column=0, pady=2)
 
     # Filter Dialog DOB Day
-    filter_day_input = DialogInput(filter_dob_frame, width=2)
+    day_var = tk.StringVar()
+    filter_day_input = DialogInput(
+        filter_dob_frame, width=2, textvariable=day_var)
     filter_day_input.grid(row=0, column=1, padx=10, sticky=tk.E)
 
     # Filter Dialog DOB Month
-    filter_month_input = DialogInput(filter_dob_frame, width=2,)
+    month_var = tk.StringVar()
+    filter_month_input = DialogInput(
+        filter_dob_frame, width=2, textvariable=month_var)
     filter_month_input.grid(row=0, column=2, padx=10, sticky=tk.E)
 
     # Filter Dialog  DOB Year
-    filter_year_input = DialogInput(filter_dob_frame, width=2)
+    year_var = tk.StringVar()
+    filter_year_input = DialogInput(
+        filter_dob_frame, width=2, textvariable=year_var)
     filter_year_input.grid(row=0, column=3, padx=10, sticky=tk.E)
 
     # Filter Dialog Subject Container
@@ -394,6 +481,7 @@ def renderFilterDialog():
         filter_body_frame, background=PRIMARY_BG)
     filter_subject_frame.grid(row=3, column=0)
 
+    check_vars = list(map(lambda x: tk.IntVar(), range(10)))
     # Filter Dialog Subjects
     for index, prop in enumerate(SUBJECTS):
         subject = SUBJECTS[prop]
@@ -410,16 +498,19 @@ def renderFilterDialog():
 
         filter_subj_btn = tk.Checkbutton(
             filter_subject_frame,
+            variable=check_vars[index],
             background=PRIMARY_BG,
             foreground=ACTIVE_FG,
             activebackground=PRIMARY_BG)
         filter_subj_btn.grid(row=index, column=1, sticky="E")
 
     # Filter Dialog Submit Button
+    filter_by_values = [f_name_var, l_name_var,
+                        day_var, month_var, year_var, check_vars]
     filter_submit_btn = DialogButton(
         filter_body_frame,
         text="Filter",
-        command=submitFilter)
+        command=lambda: submitFilter(filter_by_values, filter_frame))
     filter_submit_btn.grid(row=4, column=0)
 
 
@@ -752,6 +843,7 @@ def createFooter(footer_container):
 
 
 # ----------------------------- Pagination Info ---------------------------------
+
 
     def paginate(direction):
         if direction == "+" and state["curr_page"] < state["total_pages"]:
