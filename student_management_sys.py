@@ -17,6 +17,7 @@ import math
 import csv
 import tkinter as tk
 from tkinter import messagebox
+import re
 
 # ---------------------------- Get Students From CSV ---------------------------
 
@@ -76,15 +77,15 @@ BUTTONS = ["New", "Modify", "Delete", "Filter",
 CAPTION_NAMES = ["First Name", "Last Name",
                  "Phone", "Subjects", "DOB", "Email", " "]
 SUBJECTS = {
-    "MA": "Maths",
-    "CH": "Chemistry",
     "BI": "Biology",
-    "IT": "IT",
-    "PH": "Physics",
-    "GE": "Geology",
+    "CH": "Chemistry",
     "EN": "English",
     "FL": "Foreign Language",
+    "GE": "Geography",
     "HI": "History",
+    "IT": "IT",
+    "MA": "Maths",
+    "PH": "Physics",
     "PR": "Programming"}
 
 # ----------------------- Color Palette and GUI constants ----------------------
@@ -323,7 +324,7 @@ def submitFilter(filter_by_values, dialog):
     year = filter_by_values[4].get()
 
     def getSubjects(i, val):
-        abbrs = ["MA", "CH", "BI", "IT", "PH", "GE", "EN", "FL", "HI", "PR"]
+        abbrs = ["BI", "CH", "EN", "FL", "GE", "HI", "IT", "MA", "PH", "PR"]
         if val:
             return abbrs[i]
 
@@ -690,6 +691,57 @@ def renderSelectionDialog():
     select_inverse_btn.grid(row=0, column=2, padx=5)
 
 
+# -------------------------- Submit New Student Function -------------------------
+def submitNewStudent(student_inputs, check_btn_flags):
+    # Extract inputs and checkbox values
+    [f_name, l_name, phone, email, day, month, year] = map(
+        lambda inp: inp.get(), student_inputs)
+
+    abbrs = ["BI", "HI", "CH", "IT", "EN", "MA", "FL", "PH", "GE", "PR"]
+
+    subjects = list(filter(
+        lambda abbr: bool(abbr),
+        list(map(
+            lambda inp: abbrs[inp[0]] if inp[1].get() else None,
+            enumerate(check_btn_flags)))
+    ))
+
+    # Validate Inputs
+    def msg(message):
+        title = "New Record Input Warning"
+        messagebox.showinfo(title, message)
+
+    if not len(f_name):
+        return msg("First name is missing!")
+
+    if not f_name.isalpha() or not l_name.isalpha():
+        return msg("Name can only contain letters!")
+
+    if not phone.isdigit():
+        return msg("Invalid phone number!")
+
+    if len(phone) < 8:
+        return msg("Phone number has to be at least 8 digit long!")
+
+    if not len(l_name):
+        return msg("Last name is missing!")
+
+    if not re.match(r"[^@]+@[^@]+\.[^@]+", email):
+        return msg("Invalid email address!")
+
+    if not len(day) or not day.isdigit() or int(day) > 31 or int(day) < 1 or float(day) % 1 != 0:
+        return msg("Invalid day input!")
+
+    if not len(month) or not month.isdigit() or int(month) > 12 or int(month) < 1 or float(month) % 1 != 0:
+        return msg("Invalid month input!")
+
+    if not len(year) or not year.isdigit() or int(year) > 99 or int(year) < 0 or float(year) % 1 != 0:
+        return msg("Invalid year input!")
+
+    if len(subjects) != 4:
+        return msg("Exactly 4 subjects must be selected!")
+
+
 # -------------------------------- New Dialog Box --------------------------------
 def renderNewDialog():
     global new_frame
@@ -744,7 +796,8 @@ def renderNewDialog():
     new_f_name_label.grid(row=-0, column=0, sticky=tk.W)
 
     # New Dialog First Name Input
-    new_f_name_input = DialogInput(new_body)
+    f_name_var = tk.StringVar()
+    new_f_name_input = DialogInput(new_body, textvariable=f_name_var)
     new_f_name_input.grid(row=0, column=1, sticky=tk.EW, padx=(0, 4))
 
     # New Dialog Last Name Label
@@ -753,7 +806,8 @@ def renderNewDialog():
     new_l_name_label.grid(row=1, column=0, sticky=tk.W)
 
     # New Dialog Last Name Input
-    new_l_name_input = DialogInput(new_body)
+    l_name_var = tk.StringVar()
+    new_l_name_input = DialogInput(new_body, textvariable=l_name_var)
     new_l_name_input.grid(row=1, column=1, sticky=tk.EW, padx=(0, 4))
 
     # New Dialog Separator 2
@@ -767,7 +821,8 @@ def renderNewDialog():
     new_phone_label.grid(row=3, column=0, sticky=tk.W)
 
     # New Dialog Phone Number Input
-    new_phone_input = DialogInput(new_body)
+    phone_var = tk.StringVar()
+    new_phone_input = DialogInput(new_body, textvariable=phone_var)
     new_phone_input.grid(row=3, column=1, sticky=tk.EW, padx=(0, 4))
 
     # New Dialog Email Label
@@ -776,7 +831,8 @@ def renderNewDialog():
     new_email_label.grid(row=4, column=0, sticky=tk.W)
 
     # New Dialog Email Input
-    new_email_input = DialogInput(new_body)
+    email_var = tk.StringVar()
+    new_email_input = DialogInput(new_body, textvariable=email_var)
     new_email_input.grid(row=4, column=1, sticky=tk.EW, padx=(0, 4))
 
     # New Dialog Separator 3
@@ -797,18 +853,21 @@ def renderNewDialog():
     new_dob_input_frame.grid_columnconfigure(2, minsize=67, weight=1)
 
     # New Dialog DOB Day Input
+    day_var = tk.StringVar()
     new_dob_day_input = DialogInput(
-        new_dob_input_frame, width=2, justify=tk.CENTER)
+        new_dob_input_frame, width=2, justify=tk.CENTER, textvariable=day_var)
     new_dob_day_input.grid(row=0, column=0, sticky=tk.EW, padx=(0, 4))
 
     # New Dialog DOB Month Input
+    month_var = tk.StringVar()
     new_dob_month_input = DialogInput(
-        new_dob_input_frame, width=2, justify=tk.CENTER)
+        new_dob_input_frame, width=2, justify=tk.CENTER, textvariable=month_var)
     new_dob_month_input.grid(row=0, column=1, sticky=tk.EW, padx=4)
 
     # New Dialog DOB Year Input
+    year_var = tk.StringVar()
     new_dob_year_input = DialogInput(
-        new_dob_input_frame, width=2, justify=tk.CENTER)
+        new_dob_input_frame, width=2, justify=tk.CENTER, textvariable=year_var)
     new_dob_year_input.grid(row=0, column=2, sticky=tk.EW, padx=4)
 
     # New Dialog Separator 4
@@ -821,6 +880,8 @@ def renderNewDialog():
         new_body, text="Select 4 Subjects")
     new_subjects_label.grid(row=8, column=0, sticky=tk.W)
 
+    check_vars = list(map(lambda x: tk.IntVar(), range(10)))
+
     # New Dialog Subject Row 0 Col 0 SUBJECT 0
     new_subject_r0_c0 = tk.Frame(new_body, width=200, background=PRIMARY_BG)
     new_subject_r0_c0.grid(row=9, column=0)
@@ -829,7 +890,7 @@ def renderNewDialog():
     new_subject_0_label = DialogLabel(new_subject_r0_c0, text="[BI] Biology")
     new_subject_0_label.grid(row=0, column=0, sticky=tk.W)
     new_subject_0_check = tk.Checkbutton(
-        new_subject_r0_c0,
+        new_subject_r0_c0,  variable=check_vars[0],
         background=PRIMARY_BG, foreground=ACTIVE_FG, activebackground=PRIMARY_BG)
     new_subject_0_check.grid(row=0, column=1, sticky=tk.E)
 
@@ -841,7 +902,7 @@ def renderNewDialog():
     new_subject_1_label = DialogLabel(new_subject_r0_c1, text="[HI] History")
     new_subject_1_label.grid(row=0, column=0, sticky=tk.W)
     new_subject_1_check = tk.Checkbutton(
-        new_subject_r0_c1,
+        new_subject_r0_c1, variable=check_vars[1],
         background=PRIMARY_BG, foreground=ACTIVE_FG, activebackground=PRIMARY_BG)
     new_subject_1_check.grid(row=0, column=1, sticky=tk.E)
 
@@ -853,7 +914,7 @@ def renderNewDialog():
     new_subject_2_label = DialogLabel(new_subject_r1_c0, text="[CH] Chemistry")
     new_subject_2_label.grid(row=0, column=0, sticky=tk.W)
     new_subject_2_check = tk.Checkbutton(
-        new_subject_r1_c0,
+        new_subject_r1_c0, variable=check_vars[2],
         background=PRIMARY_BG, foreground=ACTIVE_FG, activebackground=PRIMARY_BG)
     new_subject_2_check.grid(row=0, column=1, sticky=tk.E)
 
@@ -866,7 +927,7 @@ def renderNewDialog():
         new_subject_r1_c1, text="[IT] Information Techonlogy")
     new_subject_3_label.grid(row=0, column=0, sticky=tk.W)
     new_subject_3_check = tk.Checkbutton(
-        new_subject_r1_c1,
+        new_subject_r1_c1, variable=check_vars[3],
         background=PRIMARY_BG, foreground=ACTIVE_FG, activebackground=PRIMARY_BG)
     new_subject_3_check.grid(row=0, column=1, sticky=tk.E)
 
@@ -878,7 +939,7 @@ def renderNewDialog():
     new_subject_4_label = DialogLabel(new_subject_r2_c0, text="[EN] English")
     new_subject_4_label.grid(row=0, column=0, sticky=tk.W)
     new_subject_4_check = tk.Checkbutton(
-        new_subject_r2_c0,
+        new_subject_r2_c0, variable=check_vars[4],
         background=PRIMARY_BG, foreground=ACTIVE_FG, activebackground=PRIMARY_BG)
     new_subject_4_check.grid(row=0, column=1, sticky=tk.E)
 
@@ -891,7 +952,7 @@ def renderNewDialog():
         new_subject_r2_c1, text="[MA] Maths")
     new_subject_5_label.grid(row=0, column=0, sticky=tk.W)
     new_subject_5_check = tk.Checkbutton(
-        new_subject_r2_c1,
+        new_subject_r2_c1, variable=check_vars[5],
         background=PRIMARY_BG, foreground=ACTIVE_FG, activebackground=PRIMARY_BG)
     new_subject_5_check.grid(row=0, column=1, sticky=tk.E)
 
@@ -904,7 +965,7 @@ def renderNewDialog():
         new_subject_r3_c0, text="[FL] Foreign Language")
     new_subject_6_label.grid(row=0, column=0, sticky=tk.W)
     new_subject_6_check = tk.Checkbutton(
-        new_subject_r3_c0,
+        new_subject_r3_c0, variable=check_vars[6],
         background=PRIMARY_BG, foreground=ACTIVE_FG, activebackground=PRIMARY_BG)
     new_subject_6_check.grid(row=0, column=1, sticky=tk.E)
 
@@ -917,7 +978,7 @@ def renderNewDialog():
         new_subject_r3_c1, text="[PH] Physics")
     new_subject_7_label.grid(row=0, column=0, sticky=tk.W)
     new_subject_7_check = tk.Checkbutton(
-        new_subject_r3_c1,
+        new_subject_r3_c1, variable=check_vars[7],
         background=PRIMARY_BG, foreground=ACTIVE_FG, activebackground=PRIMARY_BG)
     new_subject_7_check.grid(row=0, column=1, sticky=tk.E)
 
@@ -930,7 +991,7 @@ def renderNewDialog():
         new_subject_r4_c0, text="[GE] Geography")
     new_subject_8_label.grid(row=0, column=0, sticky=tk.W)
     new_subject_8_check = tk.Checkbutton(
-        new_subject_r4_c0,
+        new_subject_r4_c0, variable=check_vars[8],
         background=PRIMARY_BG, foreground=ACTIVE_FG, activebackground=PRIMARY_BG)
     new_subject_8_check.grid(row=0, column=1, sticky=tk.E)
 
@@ -943,7 +1004,7 @@ def renderNewDialog():
         new_subject_r4_c1, text="[PR] Programming")
     new_subject_9_label.grid(row=0, column=0, sticky=tk.W)
     new_subject_9_check = tk.Checkbutton(
-        new_subject_r4_c1,
+        new_subject_r4_c1, variable=check_vars[9],
         background=PRIMARY_BG, foreground=ACTIVE_FG, activebackground=PRIMARY_BG)
     new_subject_9_check.grid(row=0, column=1, sticky=tk.E)
 
@@ -953,7 +1014,10 @@ def renderNewDialog():
                          columnspan=2, pady=(4, 2))
 
     # New Dialog Submit Button
-    new_submit = DialogButton(new_body, text="Submit", width=10)
+    new_dialog_vars = [f_name_var, l_name_var, phone_var,
+                       email_var, day_var, month_var, year_var]
+    new_submit = DialogButton(new_body, text="Submit",
+                              width=10, command=lambda: submitNewStudent(new_dialog_vars, check_vars))
     new_submit.grid(row=15, column=0, columnspan=2)
 
     # New Dialog Separator 6
@@ -1281,6 +1345,7 @@ def createFooter(footer_container):
 
 
 # ----------------------------- Pagination Info ---------------------------------
+
 
     def paginate(direction):
         if direction == "+" and state["curr_page"] < state["total_pages"]:
