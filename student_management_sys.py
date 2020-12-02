@@ -47,7 +47,7 @@ def reloadTable():
     state["filtered"] = None
     state["selected"] = []
     state["sortedby"] = False
-    state["sort_asc"] = False
+    state["sort_asc"] = True
 
 
 # ---------------------------------- App State ---------------------------------
@@ -63,7 +63,7 @@ state = {
     "selected": [],
     "filtered": None,
     "sortedby": False,
-    "sort_asc": False,
+    "sort_asc": True,
 }
 
 
@@ -528,10 +528,11 @@ def renderFilterDialog():
 
 
 # ---------------------------- Sort Method Function ---------------------------
-def sortMethod(method):
+def sortMethod(method, dialog):
     global students
     if method == "f_name" or method == "l_name":
         state["sortedby"] = method
+        state["sort_asc"] = True
         sorted_students = sorted(students, key=lambda x: x[method])
 
     if method == "reverse":
@@ -543,6 +544,8 @@ def sortMethod(method):
     state["update"].append("table")
     state["update"].append("footer")
     state["selected"] = []
+
+    dialog.destroy()
 
 
 # ------------------------------ Sort Dialog Box ------------------------------
@@ -581,7 +584,7 @@ def renderSortDialog():
         sort_options_frame,
         text="First Name",
         width=14,
-        command=lambda: sortMethod("f_name"))
+        command=lambda: sortMethod("f_name", sort_frame))
     sort_all_btn.grid(row=0, column=0, padx=5)
 
     # Sort by Last Name Button
@@ -589,7 +592,7 @@ def renderSortDialog():
         sort_options_frame,
         text="Last Name",
         width=14,
-        command=lambda: sortMethod("l_name"))
+        command=lambda: sortMethod("l_name", sort_frame))
     desort_all_btn.grid(row=0, column=1, padx=5)
 
     # Reverse Sort Button
@@ -597,7 +600,7 @@ def renderSortDialog():
         sort_options_frame,
         text="Reverse",
         width=14,
-        command=lambda: sortMethod("reverse"))
+        command=lambda: sortMethod("reverse", sort_frame))
     sort_inverse_btn.grid(row=0, column=2, padx=5)
 
 
@@ -912,6 +915,38 @@ def createFooter(footer_container):
     sort_info_frame = tk.Frame(
         footer_container, width=293, height=32, background=PRIMARY_BG)
     sort_info_frame.grid(row=0, column=0)
+    sort_info_frame.grid_columnconfigure(0, minsize=293)
+
+    sort_items = tk.Frame(sort_info_frame, width=239, background=PRIMARY_BG)
+    sort_items.grid(row=0, column=0, sticky=tk.NSEW)
+
+    sorted_txt = "Sorted by : "
+    asc_txt = "ASC" if state["sort_asc"] else "DESC"
+
+    name_txt = ""
+    if state["sortedby"] == "f_name":
+        name_txt = "first name"
+
+    if state["sortedby"] == "l_name":
+        name_txt = "last name"
+
+    sorted_state = f'  {name_txt} {asc_txt}  '
+    sorted_txt += sorted_state if state["sortedby"] else "-"
+
+    sort_label = tk.Label(
+        sort_items,
+        text=sorted_txt,
+        background=PRIMARY_BG,
+        foreground=PRIMARY_FG,
+        anchor=tk.E)
+    sort_label.grid(row=0, column=0)
+    sort_label.propagate(False)
+
+    if state["sortedby"]:
+        sort_clear_btn = DialogButton(
+            sort_items, text="Clear Sorting",
+            command=reloadTable)
+        sort_clear_btn.grid(row=0, column=1)
 
 
 # ------------------------------- Filter Info -----------------------------------
@@ -920,8 +955,9 @@ def createFooter(footer_container):
     filter_info_frame.grid(row=0, column=1)
     filter_info_frame.grid_columnconfigure(0, minsize=293)
 
-    filter_items = tk.Frame(filter_info_frame, width=239)
-    filter_items.grid(row=0, column=0)
+    filter_items = tk.Frame(
+        filter_info_frame, width=239, background=PRIMARY_BG)
+    filter_items.grid(row=0, column=0, sticky=tk.NSEW)
 
     [fil, tot_fil] = state["filtered"] or [0, 0]
     filter_text = f"Filtered: [ {fil} | {tot_fil} ]"
