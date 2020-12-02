@@ -818,17 +818,36 @@ def createFooter(footer_container):
     footer_container.grid(row=2, column=0)
     footer_container.grid_propagate(False)
 
+# ------------------------------ Sorting Info -----------------------------------
+    sort_info_frame = tk.Frame(
+        footer_container, width=293, height=32, background=PRIMARY_BG)
+    sort_info_frame.grid(row=0, column=0)
+
+
 # ------------------------------- Filter Info -----------------------------------
     filter_info_frame = tk.Frame(
-        footer_container, width=440, height=32, background=PRIMARY_BG)
-    filter_info_frame.grid(row=0, column=0)
+        footer_container, width=293, height=32, background=PRIMARY_BG)
+    filter_info_frame.grid(row=0, column=1)
+    filter_info_frame.grid_columnconfigure(0, minsize=293)
+
+    [fil, tot_fil] = state["filtered"] or [0, 0]
+    filter_text = f"Filtered: [ {fil} | {tot_fil} ]"
+    filter_label = tk.Label(
+        filter_info_frame,
+        text=filter_text,
+        background=PRIMARY_BG,
+        foreground=PRIMARY_FG,
+        anchor=tk.W)
+    filter_label.grid(row=0, column=0, sticky=tk.NSEW)
+    filter_label.propagate(False)
+
 
 # ----------------------------- Selection Info ----------------------------------
     selection_info_frame = tk.Frame(
-        footer_container, width=440, height=32)
-    selection_info_frame.grid(row=0, column=1)
+        footer_container, width=293, height=32)
+    selection_info_frame.grid(row=0, column=2)
     selection_info_frame.propagate(False)
-    selection_info_frame.grid_columnconfigure(0, minsize=440)
+    selection_info_frame.grid_columnconfigure(0, minsize=293)
 
     selected_num = len(state["selected"])
     selection_text = f"Selected: [ {selected_num} | {len(students)} ]"
@@ -859,7 +878,7 @@ def createFooter(footer_container):
     # Pagination Control
     pagination_frame = tk.Frame(
         footer_container, width=160, height=32, background=PRIMARY_BG)
-    pagination_frame.grid(row=0, column=2)
+    pagination_frame.grid(row=0, column=3)
     pagination_frame.grid_propagate(False)
 
     pagination_label1 = tk.Label(
