@@ -51,6 +51,16 @@ def reloadTable():
     state["sort_asc"] = True
 
 
+def tableIntoCSVFile(path):
+    with open(path, 'w', newline='') as csvfile:
+        fieldnames = ['f_name', 'l_name', "phone", "subjects", "dob", "email"]
+        writer = csv.DictWriter(csvfile, fieldnames=fieldnames)
+        writer.writeheader()
+
+        for student in students:
+            writer.writerow(student)
+
+
 # ---------------------------------- App State ---------------------------------
 # -       menu_open: the currently opened dialog eg: menu_open = "Search"      -
 # -        update: elements that needs rerendering eg: update = ["list"]       -
@@ -692,7 +702,8 @@ def renderSelectionDialog():
 
 
 # -------------------------- Submit New Student Function -------------------------
-def submitNewStudent(student_inputs, check_btn_flags):
+def submitNewStudent(student_inputs, check_btn_flags, dialog):
+    global students
     # Extract inputs and checkbox values
     [f_name, l_name, phone, email, day, month, year] = map(
         lambda inp: inp.get(), student_inputs)
@@ -707,6 +718,7 @@ def submitNewStudent(student_inputs, check_btn_flags):
     ))
 
     # Validate Inputs
+
     def msg(message):
         title = "New Record Input Warning"
         messagebox.showinfo(title, message)
@@ -740,6 +752,24 @@ def submitNewStudent(student_inputs, check_btn_flags):
 
     if len(subjects) != 4:
         return msg("Exactly 4 subjects must be selected!")
+
+    def padZeros(num):
+        return "0" + num if int(num) < 10 else num
+
+    new_student = {
+        "f_name": f_name,
+        "l_name": l_name,
+        "phone": phone,
+        "subjects": "".join(subjects),
+        "dob": f"{padZeros(day)}.{padZeros(month)}.{padZeros(year)}",
+        "email": email
+    }
+
+    students.append(new_student)
+    tableIntoCSVFile("students.csv")
+    getCSVTable("students.csv")
+    reloadTable()
+    dialog.destroy()
 
 
 # -------------------------------- New Dialog Box --------------------------------
@@ -1017,7 +1047,7 @@ def renderNewDialog():
     new_dialog_vars = [f_name_var, l_name_var, phone_var,
                        email_var, day_var, month_var, year_var]
     new_submit = DialogButton(new_body, text="Submit",
-                              width=10, command=lambda: submitNewStudent(new_dialog_vars, check_vars))
+                              width=10, command=lambda: submitNewStudent(new_dialog_vars, check_vars, new_frame))
     new_submit.grid(row=15, column=0, columnspan=2)
 
     # New Dialog Separator 6
