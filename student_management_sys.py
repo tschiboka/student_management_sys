@@ -38,11 +38,22 @@ def getCSVTable(path):
 
 students = getCSVTable("students.csv")
 
+
+def reloadTable():
+    global students
+    students = getCSVTable("students.csv")
+    state["update"].append("table")
+    state["update"].append("footer")
+    state["filtered"] = None
+    state["selected"] = []
+    state["sortedby"] = False
+    state["sort_asc"] = False
+
+
 # ---------------------------------- App State ---------------------------------
 # -       menu_open: the currently opened dialog eg: menu_open = "Search"      -
 # -        update: elements that needs rerendering eg: update = ["list"]       -
 # ------------------------------------------------------------------------------
-
 
 state = {
     "menu_open": None,
@@ -51,6 +62,8 @@ state = {
     "curr_page": 1,
     "selected": [],
     "filtered": None,
+    "sortedby": False,
+    "sort_asc": False,
 }
 
 
@@ -514,6 +527,80 @@ def renderFilterDialog():
     filter_submit_btn.grid(row=4, column=0)
 
 
+# ---------------------------- Sort Method Function ---------------------------
+def sortMethod(method):
+    global students
+    if method == "f_name" or method == "l_name":
+        state["sortedby"] = method
+        sorted_students = sorted(students, key=lambda x: x[method])
+
+    if method == "reverse":
+        sorted_students = students[::-1]
+        state["sort_asc"] = False if state["sort_asc"] == True else True
+
+    print(state["sortedby"], state["sort_asc"])
+    students = sorted_students
+    state["update"].append("table")
+    state["update"].append("footer")
+    state["selected"] = []
+
+
+# ------------------------------ Sort Dialog Box ------------------------------
+def renderSortDialog():
+    # Sort Dialog Frame
+    sort_frame = tk.Frame(window, width=400, background=PRIMARY_BG)
+    sort_frame.place(bordermode=tk.INSIDE, x=150, y=55)
+    sort_frame.propagate(False)
+
+    # Sort Header
+    sort_header = tk.Frame(sort_frame)
+    sort_header.grid(row=0, column=0)
+    sort_header.grid_columnconfigure(0, minsize=400)
+
+    # Sort Header Label
+    sort_header_label = DialogLabel(
+        sort_header, text="Sort Students by")
+    sort_header_label.grid(row=0, column=0, sticky=tk.NSEW)
+
+    # Sort Close Button
+    sort_close_btn = CloseButton(
+        sort_header,
+        command=lambda: sort_frame.destroy())
+    sort_close_btn.grid(row=0, column=1)
+
+    # Sort Options Frame
+    sort_options_frame = tk.Frame(
+        sort_frame,
+        background=PRIMARY_BG,
+        width=400,
+        pady=10)
+    sort_options_frame.grid(row=1, column=0)
+
+    # Sort by First Name Button
+    sort_all_btn = DialogButton(
+        sort_options_frame,
+        text="First Name",
+        width=14,
+        command=lambda: sortMethod("f_name"))
+    sort_all_btn.grid(row=0, column=0, padx=5)
+
+    # Sort by Last Name Button
+    desort_all_btn = DialogButton(
+        sort_options_frame,
+        text="Last Name",
+        width=14,
+        command=lambda: sortMethod("l_name"))
+    desort_all_btn.grid(row=0, column=1, padx=5)
+
+    # Reverse Sort Button
+    sort_inverse_btn = DialogButton(
+        sort_options_frame,
+        text="Reverse",
+        width=14,
+        command=lambda: sortMethod("reverse"))
+    sort_inverse_btn.grid(row=0, column=2, padx=5)
+
+
 # ---------------------------- Selection Functions ----------------------------
 
 
@@ -599,6 +686,9 @@ def createDialog(dialog_name):
 
     if (dialog_name == "Selection"):
         renderSelectionDialog()
+
+    if (dialog_name == "Sort"):
+        renderSortDialog()
 
     state["menu_open"] = None  # ---- Reset state so listener does not re-paint
 
@@ -830,10 +920,13 @@ def createFooter(footer_container):
     filter_info_frame.grid(row=0, column=1)
     filter_info_frame.grid_columnconfigure(0, minsize=293)
 
+    filter_items = tk.Frame(filter_info_frame, width=239)
+    filter_items.grid(row=0, column=0)
+
     [fil, tot_fil] = state["filtered"] or [0, 0]
     filter_text = f"Filtered: [ {fil} | {tot_fil} ]"
     filter_label = tk.Label(
-        filter_info_frame,
+        filter_items,
         text=filter_text,
         background=PRIMARY_BG,
         foreground=PRIMARY_FG,
@@ -841,6 +934,11 @@ def createFooter(footer_container):
     filter_label.grid(row=0, column=0, sticky=tk.NSEW)
     filter_label.propagate(False)
 
+    if state["filtered"]:
+        filter_clear_btn = DialogButton(
+            filter_items, text="Clear Filter",
+            command=reloadTable)
+        filter_clear_btn.grid(row=0, column=1)
 
 # ----------------------------- Selection Info ----------------------------------
     selection_info_frame = tk.Frame(
