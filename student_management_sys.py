@@ -71,8 +71,8 @@ state = {
 WIN_WIDTH = 1200
 WIN_HEIGHT = 450
 TABLE_ROWS = 10
-BUTTONS = ["Search", "Filter", "Sort", "New",
-           "Modify", "Insert", "Delete", "Selection", "Exit"]
+BUTTONS = ["New", "Modify", "Delete", "Filter",
+           "Search", "Sort",  "Selection", "Exit"]
 CAPTION_NAMES = ["First Name", "Last Name",
                  "Phone", "Subjects", "DOB", "Email", " "]
 SUBJECTS = {
@@ -257,7 +257,7 @@ def renderSearchDialog():
         window,
         width=400,
         background=PRIMARY_BG)
-    search_frame.place(bordermode=tk.INSIDE, x=150, y=0)
+    search_frame.place(bordermode=tk.INSIDE, x=150, y=111)
     search_frame.grid_columnconfigure(0, minsize=370)
 
     # Search dialog header
@@ -394,7 +394,7 @@ def renderFilterDialog():
         window,
         width=400,
         background=PRIMARY_BG)
-    filter_frame.place(bordermode=tk.INSIDE, x=150, y=27)
+    filter_frame.place(bordermode=tk.INSIDE, x=150, y=0)
     filter_frame.grid_columnconfigure(0, minsize=400)
 
     # Filter Dialog Header
@@ -552,7 +552,7 @@ def sortMethod(method, dialog):
 def renderSortDialog():
     # Sort Dialog Frame
     sort_frame = tk.Frame(window, width=400, background=PRIMARY_BG)
-    sort_frame.place(bordermode=tk.INSIDE, x=150, y=55)
+    sort_frame.place(bordermode=tk.INSIDE, x=150, y=138)
     sort_frame.propagate(False)
 
     # Sort Header
@@ -628,7 +628,7 @@ def selectionMethod(method):
 def renderSelectionDialog():
     # Select Dialog Frame
     selection_frame = tk.Frame(window, width=400, background=PRIMARY_BG)
-    selection_frame.place(bordermode=tk.INSIDE, x=150, y=195)
+    selection_frame.place(bordermode=tk.INSIDE, x=150, y=167)
     selection_frame.propagate(False)
 
     # Select Header
@@ -680,18 +680,69 @@ def renderSelectionDialog():
     select_inverse_btn.grid(row=0, column=2, padx=5)
 
 
+# -------------------------------- New Dialog Box --------------------------------
+def renderNewDialog():
+    # New Dialog Container
+    new_frame = tk.Frame(
+        window,
+        width=400,
+        background=PRIMARY_BG)
+    new_frame.place(bordermode=tk.INSIDE, x=150, y=0)
+    new_frame.grid_columnconfigure(0, minsize=400)
+
+    # New Dialog Header
+    new_header_frame = tk.Frame(
+        new_frame, background=PRIMARY_BG)
+    new_header_frame.grid(row=0, column=0)
+
+    new_header_label = DialogLabel(
+        new_header_frame, text="Create Student Record")
+    new_header_label.grid(row=0, column=0, padx=10)
+
+    # New Dialog Close Button
+    new_close_btn = CloseButton(
+        new_frame, command=lambda: new_frame.destroy())
+    new_close_btn.grid(row=0, column=1)
+
+    # New Dialog Body
+    new_body = tk.Frame(new_frame, background=PRIMARY_BG)
+    new_body.grid(row=1, column=0)
+    new_body.grid_columnconfigure(0, minsize=200)
+
+    # New Dialog First Name Label
+    new_f_name_label = DialogLabel(
+        new_body, text="First Name")
+    new_f_name_label.grid(row=-0, column=0)
+
+    # New Dialog First Name Input
+    new_f_name_input = DialogInput(new_body)
+    new_f_name_input.grid(row=0, column=1)
+
+    # New Dialog Last Name Label
+    new_l_name_label = DialogLabel(
+        new_body, text="Last Name")
+    new_l_name_label.grid(row=1, column=0)
+
+    # New Dialog Last Name Input
+    new_l_name_input = DialogInput(new_body)
+    new_l_name_input.grid(row=1, column=1)
+
+
 def createDialog(dialog_name):
-    if (dialog_name == "Search"):
+    if dialog_name == "Search":
         renderSearchDialog()
 
-    if (dialog_name == "Filter"):
+    if dialog_name == "Filter":
         renderFilterDialog()
 
-    if (dialog_name == "Selection"):
+    if dialog_name == "Selection":
         renderSelectionDialog()
 
-    if (dialog_name == "Sort"):
+    if dialog_name == "Sort":
         renderSortDialog()
+
+    if dialog_name == "New":
+        renderNewDialog()
 
     state["menu_open"] = None  # ---- Reset state so listener does not re-paint
 
