@@ -704,7 +704,7 @@ def renderSelectionDialog():
 
 
 # -------------------------- Submit New Student Function -------------------------
-def submitNewStudent(student_inputs, check_btn_flags, dialog):
+def submitStudent(student_inputs, check_btn_flags, dialog, method, selected_index):
     global students
     # Extract inputs and checkbox values
     [f_name, l_name, phone, email, day, month, year] = map(
@@ -767,7 +767,12 @@ def submitNewStudent(student_inputs, check_btn_flags, dialog):
         "email": email
     }
 
-    students.append(new_student)
+    if method == "new":
+        students.append(new_student)
+
+    if method == "modify":
+        students[selected_index] = new_student
+
     tableIntoCSVFile("students.csv")
     getCSVTable("students.csv")
     reloadTable()
@@ -1062,8 +1067,14 @@ def renderNewDialog(method):
     # New Dialog Submit Button
     new_dialog_vars = [f_name_var, l_name_var, phone_var,
                        email_var, day_var, month_var, year_var]
-    new_submit = DialogButton(new_body, text="Submit",
-                              width=10, command=lambda: submitNewStudent(new_dialog_vars, check_vars, new_frame))
+
+    # We need to pass state[selected] as an argument for submitStudent function
+    # Because user can select other elements while submitting, consequently
+    # changing the index of the student being under modification
+
+    new_submit = DialogButton(
+        new_body, text="Submit", width=10,
+        command=lambda: submitStudent(new_dialog_vars, check_vars, new_frame, method, state["selected"][0]))
     new_submit.grid(row=15, column=0, columnspan=2)
 
     # New Dialog Separator 6
@@ -1082,9 +1093,9 @@ def renderNewDialog(method):
 
         [day, month, year] = student["dob"].split(".")
 
-        new_dob_day_input.insert(tk.END, day)
-        new_dob_month_input.insert(tk.END, month)
-        new_dob_year_input.insert(tk.END, year)
+        new_dob_day_input.insert(tk.END, int(day))  # get rid of zeros like 09
+        new_dob_month_input.insert(tk.END, int(month))
+        new_dob_year_input.insert(tk.END, int(year))
 
         # Check Subjects
         subjects = student["subjects"]
@@ -1188,171 +1199,7 @@ exit_btn.grid(row=len(BUTTONS), column=0, sticky="s")
 
 sidebar.grid_rowconfigure(len(BUTTONS), weight=1)
 
-
 # -------------------------------- Data Display --------------------------------
-
-display = tk.Frame(
-    window,
-    height=WIN_HEIGHT,
-    width=1050,
-    background=PRIMARY_FG)
-display.grid(row=0, column=1)
-display.grid_propagate(False)
-
-# ---------------------------------- Caption -----------------------------------
-
-caption = tk.Frame(display, height=20, width=1050)
-caption.grid(row=0, column=0)
-caption.grid_propagate(False)
-
-table_container = tk.Frame(display, height=400, width=1050)
-
-
-# -------------------------------- Table Creation ------------------------------
-# -                   Student table has its own create function.               -
-# -       If student data is modified, table is destroyed and recreated        -
-# ------------------------------------------------------------------------------
-
-def createTable(table_container):
-    cell_width = [35, 35, 20, 20, 20, 35, 7]
-
-    for index, c_name in enumerate(CAPTION_NAMES):
-        cap = tk.Label(
-            caption,
-            width=cell_width[index],
-            text=c_name,
-            anchor=tk.W,
-            background=PRIMARY_BG,
-            foreground=PRIMARY_FG)
-        cap.grid(row=0, column=index)
-        cap.grid_propagate(False)
-        caption.grid_columnconfigure(index, weight=1)
-
-# -------------------------------- Student List --------------------------------
-
-    table_container.grid(row=1, column=0)
-    table_container.grid_propagate(False)
-    table_container.grid_columnconfigure(0, weight=0)
-    table_container.grid_rowconfigure(0, weight=0)
-
-    # divide list into chunks of 20 items
-    chunks = [students[i:i + 20] for i in range(0, len(students), 20)]
-    state["total_pages"] = math.ceil(len(students) / 20)
-
-    # display current chunk of data
-    list_to_display = chunks[state["curr_page"] - 1]
-
-    if len(list_to_display):
-        for row_index, student in enumerate(list_to_display):
-
-            # Every secound row darker
-            background = ROW_BG_LIGHT
-            foreground = PRIMARY_FG
-
-            if row_index % 2 == 0:
-                background = ROW_BG_DARK
-
-            # Check if student is selected
-            tab_index = (state["curr_page"] - 1) * 20 + row_index
-
-            selected = True if tab_index in state["selected"] else False
-
-            if selected:
-                background = SELECTED_BG
-                foreground = PRIMARY_BG
-
-            row = tk.Frame(
-                table_container,
-                width=1050,
-                height=20,
-                background=background)
-
-            student_row = [student["f_name"], student["l_name"], student["phone"],
-                           student["subjects"], student["dob"], student["email"], "X"]
-
-            # Show Student Information Details Function
-
-            def showStudentInfoDetails(index):
-                student = students[index]
-                f_name = "First Name    : " + student["f_name"]
-                l_name = "Last Name     : " + student["l_name"]
-                dob = "Date of Birth : " + student["dob"]
-                phone = "Phone Number  : " + student["phone"]
-                email = "Email         : " + student["email"]
-                sub_s = student["subjects"]
-
-                # split subject strings by 2-s
-                subs_abbr = [sub_s[i: i + 2] for i in range(0, len(sub_s), 2)]
-
-                # Assign string from abbriviation
-                decor = "\n" + (" " * 16) + u"\u2022 "
-                subs = list(map(lambda s: decor + SUBJECTS[s], subs_abbr))
-                sub_text = "".join(subs)
-
-                details = f"{f_name}\n{l_name}\n{dob}\n{phone}\n{email}\nSubjects      :{sub_text}"
-                messagebox.showinfo("Student Details", details)
-
-            # Iterate cells
-            for index, entry in enumerate(student_row):
-                # Student record
-                if index < 6:
-                    cell = tk.Label(
-                        row,
-                        width=cell_width[index],
-                        background=background,
-                        foreground=foreground,
-                        text=entry,
-                        anchor=tk.W)
-                    cell.bind("<Button 1>", lambda event,
-                              ind=tab_index: showStudentInfoDetails(ind))
-                else:
-                    # Toggle Selection
-                    def toggleSelect(index):
-                        updated_selected = state["selected"]
-                        if index in state["selected"]:
-                            updated_selected.remove(index)
-                        else:
-                            updated_selected.append(index)
-
-                        state["update"].append("table")
-                        state["update"].append("footer")
-
-                    # Selection Checkbox
-                    checkbox_text = u"\u25A3" if selected else u"\u25A1"
-                    checkbox_color = SELECTED_BG if selected else PRIMARY_FG
-
-                    cell = tk.Label(
-                        row,
-                        text=checkbox_text,
-                        foreground=checkbox_color,
-                        width=cell_width[index],
-                        background=PRIMARY_BG)
-
-                    # Bind click event to label using closures
-                    cell.bind("<Button-1>",
-                              lambda event, ind=tab_index: toggleSelect(ind))
-
-                cell.grid(row=0, column=index)
-                cell.grid_propagate(False)
-                row.grid_columnconfigure(index, weight=1)
-
-            row.grid_columnconfigure(index, weight=1)
-            row.grid(row=row_index, column=0)
-            row.grid_propagate(False)
-            table_container.grid_columnconfigure(index, weight=1)
-    else:
-        no_item = tk.Label(
-            table_container,
-            text="No Item Found!",
-            width=150,
-            height=30)
-        no_item.grid(row=0, column=0)
-        no_item.grid_propagate(False)
-        table_container.grid_columnconfigure(0, weight=1)
-        table_container.grid_rowconfigure(0, weight=1)
-
-
-createTable(table_container)
 
 
 # --------------------------------- Footer -------------------------------------
