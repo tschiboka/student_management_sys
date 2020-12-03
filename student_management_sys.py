@@ -104,6 +104,8 @@ PRIMARY_FG = "#c2c2c2"
 HOVER_BTN_BG = "#333333"
 HOVER_BTN_FG = "white"
 ACTIVE_FG = "#4cc3f1"
+ROW_BG_LIGHT = "#2a2a2a"
+ROW_BG_DARK = "#333"
 SELECTED_BG = "#95EAC1"
 
 LRG_FONT = 12
@@ -773,8 +775,20 @@ def submitNewStudent(student_inputs, check_btn_flags, dialog):
 
 
 # -------------------------------- New Dialog Box --------------------------------
-def renderNewDialog():
+def renderNewDialog(method):
     global new_frame
+
+    if (method == "modify"):
+        if not len(state["selected"]):
+            messagebox.showinfo(
+                "Select Student",
+                "You need to select a student that you want to modify.\nYou can select a student by clicking the checkbox\nat the end of student details. ['\u25A3'] ['\u25A1']")
+            return
+        if len(state["selected"]) > 1:
+            messagebox.showinfo("Selection Warning",
+                                "You have too many items selected!")
+            return
+
     # New Dialog Container
     new_frame = tk.Frame(
         window,
@@ -788,8 +802,10 @@ def renderNewDialog():
     new_header_frame.grid(row=0, column=0)
     new_header_frame.grid_columnconfigure(0, minsize=370)
 
+    header_text = "Create " if method == "new" else "Modify "
+
     new_header_label = DialogLabel(
-        new_header_frame, text="Create Student Record")
+        new_header_frame, text=f"{header_text} Student Record")
     new_header_label.grid(row=0, column=0)
 
     # New Dialog Close Button
@@ -1055,6 +1071,55 @@ def renderNewDialog():
     new_separator_4.grid(row=16, column=0, sticky=tk.EW,
                          columnspan=2, pady=(4, 2))
 
+    if method == "modify":
+        student = students[state["selected"][0]]
+
+        # Set Default Values of Inputs
+        new_f_name_input.insert(tk.END, student["f_name"])
+        new_l_name_input.insert(tk.END, student["l_name"])
+        new_phone_input.insert(tk.END, student["phone"])
+        new_email_input.insert(tk.END, student["email"])
+
+        [day, month, year] = student["dob"].split(".")
+
+        new_dob_day_input.insert(tk.END, day)
+        new_dob_month_input.insert(tk.END, month)
+        new_dob_year_input.insert(tk.END, year)
+
+        # Check Subjects
+        subjects = student["subjects"]
+        subs = [subjects[i: i + 2] for i in range(0, len(subjects), 2)]
+
+        if "BI" in subs:
+            new_subject_0_check.select()
+
+        if "HI" in subs:
+            new_subject_1_check.select()
+
+        if "CH" in subs:
+            new_subject_2_check.select()
+
+        if "IT" in subs:
+            new_subject_3_check.select()
+
+        if "EN" in subs:
+            new_subject_4_check.select()
+
+        if "MA" in subs:
+            new_subject_5_check.select()
+
+        if "FL" in subs:
+            new_subject_6_check.select()
+
+        if "PH" in subs:
+            new_subject_7_check.select()
+
+        if "GE" in subs:
+            new_subject_8_check.select()
+
+        if "PR" in subs:
+            new_subject_9_check.select()
+
 
 def createDialog(dialog_name):
     if dialog_name == "Search":
@@ -1070,7 +1135,10 @@ def createDialog(dialog_name):
         renderSortDialog()
 
     if dialog_name == "New":
-        renderNewDialog()
+        renderNewDialog("new")
+
+    if dialog_name == "Modify":
+        renderNewDialog("modify")  # Reuse renderNewDialog function
 
     state["menu_open"] = None  # ---- Reset state so listener does not re-paint
 
@@ -1178,15 +1246,20 @@ def createTable(table_container):
         for row_index, student in enumerate(list_to_display):
 
             # Every secound row darker
-            background = "#c7c7c7"
+            background = ROW_BG_LIGHT
+            foreground = PRIMARY_FG
+
             if row_index % 2 == 0:
-                background = "#e5e5e5"
+                background = ROW_BG_DARK
 
             # Check if student is selected
             tab_index = (state["curr_page"] - 1) * 20 + row_index
+
             selected = True if tab_index in state["selected"] else False
+
             if selected:
                 background = SELECTED_BG
+                foreground = PRIMARY_BG
 
             row = tk.Frame(
                 table_container,
@@ -1227,6 +1300,7 @@ def createTable(table_container):
                         row,
                         width=cell_width[index],
                         background=background,
+                        foreground=foreground,
                         text=entry,
                         anchor=tk.W)
                     cell.bind("<Button 1>", lambda event,
