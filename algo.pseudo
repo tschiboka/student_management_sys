@@ -1,0 +1,57 @@
+TITLE: EXTRACTION OF FUNCTION ARGUMENTS
+INPUT: student_inputs, check_btn_flags
+OUTPUT: f_name, l_name, phone, email, day, month, year, subjects
+
+    # student_inputs: are a list of variable objects (Tk.StringVar)
+    # like -> [<Tkinter Variable f_name>, <Tkinter Variable l_name>, ...]
+
+    # check_btn_flags: list of vaiable objects (Tk.IntVar)
+    # check-btn_flags represent subject check button states
+    # like [<IntVar>, None, None, <IntVar>,...]
+
+STEP 1: Get the values of student_inputs
+STEP 2: Create a sample of subject abbriviations
+
+    # ["BI", "HI", "CH", "IT",...]
+    # abbriviaions stand for subjects like
+    # BI -> Biology HI -> History etc
+
+STEP 3: Get index and value of check_btn_flags
+
+STEP 4.1: If flag is a truthy value call get() function
+STEP 4.2: return abbriviation form array by index
+
+STEP 5.1: If flag is falsy
+STEP 5.1: return None
+
+    # now array should look like:
+    # [EN, None, None, CH, FL,...]
+
+STEP 6: filter result array from falsy values
+STEP 7: return result
+
+
+# input array deconstruction
+VAR input_names
+FOR input LENGTH 
+    CALL get function on input
+    ASSIGN TO input_names
+
+VAR abbr ARR = ["BI", "HI", "CH", "IT",...]
+
+# getting checkbox values
+VAR subjects
+
+DEF LAMBDA # Extract
+    FOR index, flags LENGTH
+        IF flag TRUTHY
+            CALL get function on flag
+            RETURN abbr[index]
+        ELSE
+            RETURN None
+
+VAR filtered = ARR []
+FOR subjects LENGTH
+    IF subject TRUTHY
+        APPEND subject IN filtered
+

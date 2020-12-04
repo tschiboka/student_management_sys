@@ -708,6 +708,7 @@ def renderSelectionDialog():
 # -------------------------- Submit New Student Function -------------------------
 def submitStudent(student_inputs, check_btn_flags, dialog, method, selected_index):
     global students
+    print(check_btn_flags)
     # Extract inputs and checkbox values
     [f_name, l_name, phone, email, day, month, year] = map(
         lambda inp: inp.get(), student_inputs)
