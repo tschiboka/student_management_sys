@@ -1272,7 +1272,7 @@ table_container = tk.Frame(
 # ------------------------------------------------------------------------------
 
 def createTable(table_container):
-    cell_width = [35, 35, 20, 20, 20, 35, 7]
+    cell_width = [30, 30, 20, 20, 20, 45, 7]
 
     for index, c_name in enumerate(CAPTION_NAMES):
         cap = tk.Label(
