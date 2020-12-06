@@ -206,10 +206,10 @@ class CloseButton(tk.Button):
             font=(None, LRG_FONT),
             text=u"\u00D7",
             justify=tk.CENTER,
-            anchor=tk.CENTER,
             cursor="hand2",
-            ** kw)
+            anchor=tk.CENTER,
 
+            ** kw)
         self.bind("<Enter>", lambda event: self.config(
             background=HOVER_BTN_BG)
         )
