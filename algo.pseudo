@@ -1,4 +1,3 @@
-TITLE: EXTRACTION OF FUNCTION ARGUMENTS
 INPUT: student_inputs, check_btn_flags
 OUTPUT: f_name, l_name, phone, email, day, month, year, subjects
 
