@@ -258,14 +258,22 @@ def submit_search(prop, value, dialog):
     global students
     input_value = value.get()
 
-    searched_student = list(filter(
-        lambda student: str.upper(student[prop]) == str.upper(input_value), students))
-    if len(searched_student):
-        students = searched_student
+    student_index = None
+
+    for index, student_row in enumerate(students):
+        if str.upper(student_row[prop]) == str.upper(input_value):
+            student_index = index
+
+    if student_index != None:
+        jump_to_page = student_index // 20
+        state["curr_page"] = jump_to_page + 1
     else:
         messagebox.showinfo("Error", f"No Students with name\n{input_value}")
 
+    state["selected"] = [student_index]
     state["update"].append("table")
+    state["update"].append("footer")
+
     setDialog(None)
     dialog.destroy()
 
@@ -1521,6 +1529,7 @@ def createFooter(footer_container):
 
 
 # ----------------------------- Pagination Info ---------------------------------
+
 
     def paginate(direction):
         if direction == "+" and state["curr_page"] < state["total_pages"]:
