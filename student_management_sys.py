@@ -42,7 +42,7 @@ students = getCSVTable("students.csv")
 
 
 def reloadTable():
-    global students
+    global students # mutate global
     students = getCSVTable("students.csv")
     state["update"].append("table")
     state["update"].append("footer")
@@ -63,7 +63,7 @@ def tableIntoCSVFile(path):
 
 
 # ---------------------------------- App State ---------------------------------
-# -       menu_open: the currently opened dialog eg: menu_open = "Search"      -
+# -       menu_open: the currently opened dialogue eg: menu_open = "Search"      -
 # -        update: elements that needs rerendering eg: update = ["list"]       -
 # ------------------------------------------------------------------------------
 
@@ -157,10 +157,10 @@ class MainButton(tk.Button):
             foreground=PRIMARY_FG)
         )
 
-# ---------------------------- Dialog Button Class -----------------------------
+# ---------------------------- Dialogue Button Class -----------------------------
 
 
-class DialogButton(tk.Button):
+class DialogueButton(tk.Button):
     def __init__(self, master, **kw):
         tk.Button.__init__(
             self,
@@ -219,10 +219,10 @@ class CloseButton(tk.Button):
         )
 
 
-# ----------------------------- Dialog Input Class -----------------------------
+# ----------------------------- Dialogue Input Class -----------------------------
 
 
-class DialogInput(tk.Entry):
+class DialogueInput(tk.Entry):
     def __init__(self, master, **kw):
         tk.Entry.__init__(
             self,
@@ -234,10 +234,10 @@ class DialogInput(tk.Entry):
             ** kw)
 
 
-# ----------------------------- Dialog Label Class -----------------------------
+# ----------------------------- Dialogue Label Class -----------------------------
 
 
-class DialogLabel(tk.Label):
+class DialogueLabel(tk.Label):
     def __init__(self, master, **kw):
         tk.Label.__init__(
             self,
@@ -249,23 +249,30 @@ class DialogLabel(tk.Label):
 
 
 # ------------------------------- Main Functions -------------------------------
-# -                             Rendering Dialogs                              -
+# -                             Rendering Dialogues                              -
 # ------------------------------------------------------------------------------
 
 
-# ------------------------------- Search by Phone  -----------------------------
-def submit_search(prop, value, dialog):
-    global students
+# -------------------------- Search by Phone or Email  -------------------------
+# -  Parameters:                                                               -
+# -  prop  : can be set to "phone" or "email"                                  -
+# -  value : input value of the given prop                                     -
+# -  dialogue: the search dialogue in order to close it                        -
+# -  Return: void                                                              -
+# ------------------------------------------------------------------------------
+
+def submit_search(prop, value, dialogue):
+    global students # mutate global
     input_value = value.get()
 
     student_index = None
 
     for index, student_row in enumerate(students):
-        if str.upper(student_row[prop]) == str.upper(input_value):
+        if str.upper(student_row[prop]) == str.upper(input_value): # case insensitive search
             student_index = index
 
     if student_index != None:
-        jump_to_page = student_index // 20
+        jump_to_page = student_index // 20 # page jumps to the selected row
         state["curr_page"] = jump_to_page + 1
     else:
         messagebox.showinfo("Error", f"No Students with name\n{input_value}")
@@ -274,15 +281,15 @@ def submit_search(prop, value, dialog):
     state["update"].append("table")
     state["update"].append("footer")
 
-    setDialog(None)
-    dialog.destroy()
+    setDialogue(None)
+    dialogue.destroy()
 
-# ------------------------------ Search Dialog Box -----------------------------
+# ------------------------------ Search Dialogue Box -----------------------------
 
 
-def renderSearchDialog():
+def renderSearchDialogue():
     global search_frame
-    # Search dialog container
+    # Search dialogue container
     search_frame = tk.Frame(
         window,
         width=400,
@@ -290,12 +297,12 @@ def renderSearchDialog():
     search_frame.place(bordermode=tk.INSIDE, x=150, y=111)
     search_frame.grid_columnconfigure(0, minsize=370)
 
-    # Search dialog header
+    # Search dialogue header
     search_header_frame = tk.Frame(
         search_frame, width=370, background=PRIMARY_BG)
     search_header_frame.grid(row=0, column=0)
 
-    search_header_label = DialogLabel(
+    search_header_label = DialogueLabel(
         search_header_frame, text="Search student by")
     search_header_label.grid(row=0, column=0, padx=10)
 
@@ -303,7 +310,7 @@ def renderSearchDialog():
         search_frame, command=lambda: search_frame.destroy())
     search_close_btn.grid(row=0, column=1)
 
-    # Search dialog frame
+    # Search dialogue frame
     search_form_frame = tk.Frame(
         search_frame, width=400, background=PRIMARY_BG)
     search_form_frame.grid(row=1, column=0, padx=15, pady=5)
@@ -311,25 +318,25 @@ def renderSearchDialog():
     search_form_frame.grid_columnconfigure(1, minsize=200)
 
     phone_value = tk.StringVar()
-    # Search dialog phone num input
-    search_form_phone_input = DialogInput(
+    # Search dialogue phone num input
+    search_form_phone_input = DialogueInput(
         search_form_frame, textvariable=phone_value)
     search_form_phone_input.grid(row=0, column=0)
 
-    # Search dialog phone num label
-    search_form_phone_btn = DialogButton(
+    # Search dialogue phone num label
+    search_form_phone_btn = DialogueButton(
         search_form_frame, text="Phone",
         command=lambda: submit_search("phone", phone_value, search_frame))
     search_form_phone_btn.grid(row=0, column=1, sticky=tk.NSEW, pady=5)
 
     email_value = tk.StringVar()
-    # Search dialog email input
-    search_form_email_input = DialogInput(
+    # Search dialogue email input
+    search_form_email_input = DialogueInput(
         search_form_frame, textvariable=email_value)
     search_form_email_input.grid(row=1, column=0, pady=5)
 
-    # Search dialog email label
-    search_form_email_btn = DialogButton(
+    # Search dialogue email label
+    search_form_email_btn = DialogueButton(
         search_form_frame, text="Email",
         command=lambda: submit_search("email", email_value, search_frame)
     )
@@ -337,20 +344,32 @@ def renderSearchDialog():
 
 
 # --------------------------- Filter Submit Function --------------------------
-def submitFilter(filter_by_values, dialog):
-    # Extracting Values from Filter Dialogbox
+# -  Parameters:                                                              -
+# -  filter_by_value: ARR of input vars                                       -
+# -  dialogue: the search dialogue in order to close it                       -
+# -  Return: void                                                             -
+# -----------------------------------------------------------------------------
+
+def submitFilter(filter_by_values, dialogue):
+    # Extracting Values from Filter Dialoguebox
     f_name = filter_by_values[0].get()
     l_name = filter_by_values[1].get()
     day = filter_by_values[2].get()
     month = filter_by_values[3].get()
     year = filter_by_values[4].get()
 
+
+    # Extract respective subject abbriviation by index
     def getSubjects(i, val):
         abbrs = ["BI", "CH", "EN", "FL", "GE", "HI", "IT", "MA", "PH", "PR"]
         if val:
             return abbrs[i]
 
-    subjects_inp = list(map(lambda el: el.get(), filter_by_values[5]))
+
+    subjects_inp = list(
+        map(lambda el: el.get(), filter_by_values[5])
+    )
+    
     subjects = list(map(lambda x: getSubjects(
         x[0], x[1]), enumerate(subjects_inp)))
     subjects = list(filter(lambda x: x, subjects))
@@ -399,7 +418,7 @@ def submitFilter(filter_by_values, dialog):
                 return True
         return False
 
-    global students
+    global students # mutate global
     oldlength = len(students)
     filtered_students = list(filter(filter_function, students))
 
@@ -410,17 +429,17 @@ def submitFilter(filter_by_values, dialog):
         state["selected"] = []
         state["filtered"] = [len(students), oldlength]
         print(state["filtered"])
-        dialog.destroy()
+        dialogue.destroy()
     else:
         messagebox.showinfo(
             "Warning", "Filtering has no result!")
 
-# ----------------------------- Filter Dialog Box -----------------------------
+# ----------------------------- Filter Dialogue Box -----------------------------
 
 
-def renderFilterDialog():
+def renderFilterDialogue():
     global filter_frame
-    # Filter Dialog Container
+    # Filter Dialogue Container
     filter_frame = tk.Frame(
         window,
         width=400,
@@ -428,26 +447,26 @@ def renderFilterDialog():
     filter_frame.place(bordermode=tk.INSIDE, x=150, y=0)
     filter_frame.grid_columnconfigure(0, minsize=400)
 
-    # Filter Dialog Header
+    # Filter Dialogue Header
     filter_header_frame = tk.Frame(
         filter_frame, background=PRIMARY_BG)
     filter_header_frame.grid(row=0, column=0)
 
-    filter_header_label = DialogLabel(
+    filter_header_label = DialogueLabel(
         filter_header_frame, text="Filter students by")
     filter_header_label.grid(row=0, column=0, padx=10)
 
-    # Filter Dialog Close Button
+    # Filter Dialogue Close Button
     filter_close_btn = CloseButton(
         filter_frame, command=lambda: filter_frame.destroy())
     filter_close_btn.grid(row=0, column=1)
 
-    # Filter Dialog Body
+    # Filter Dialogue Body
     filter_body_frame = tk.Frame(filter_frame, background=PRIMARY_BG)
     filter_body_frame.grid(row=1, column=0, sticky=tk.NSEW)
     filter_body_frame.grid_columnconfigure(0, minsize=400)
 
-    # Filter Dialog First Name
+    # Filter Dialogue First Name
     filter_f_name_frame = tk.Frame(
         filter_body_frame, background=PRIMARY_BG)
     filter_f_name_frame.grid(row=0, column=0)
@@ -463,11 +482,11 @@ def renderFilterDialog():
     filter_f_name_label.grid(row=0, column=0, sticky=tk.W)
 
     f_name_var = tk.StringVar()
-    filter_f_name_input = DialogInput(
+    filter_f_name_input = DialogueInput(
         filter_f_name_frame, width=20, textvariable=f_name_var)
     filter_f_name_input.grid(row=0, column=1, pady=2)
 
-    # Filter Dialog Last Name
+    # Filter Dialogue Last Name
     filter_l_name_frame = tk.Frame(
         filter_body_frame, background=PRIMARY_BG)
     filter_l_name_frame.grid(row=1, column=0)
@@ -483,11 +502,11 @@ def renderFilterDialog():
     filter_l_name_label.grid(row=0, column=0)
 
     l_name_var = tk.StringVar()
-    filter_l_name_input = DialogInput(
+    filter_l_name_input = DialogueInput(
         filter_l_name_frame, width=20, textvariable=l_name_var)
     filter_l_name_input.grid(row=0, column=1)
 
-    # Filter Dialog Date of Birth
+    # Filter Dialogue Date of Birth
     filter_dob_frame = tk.Frame(
         filter_body_frame, background=PRIMARY_BG)
     filter_dob_frame.grid(row=2, column=0)
@@ -502,31 +521,31 @@ def renderFilterDialog():
         anchor=tk.W)
     filter_dob_label.grid(row=0, column=0, pady=2)
 
-    # Filter Dialog DOB Day
+    # Filter Dialogue DOB Day
     day_var = tk.StringVar()
-    filter_day_input = DialogInput(
+    filter_day_input = DialogueInput(
         filter_dob_frame, width=2, textvariable=day_var)
     filter_day_input.grid(row=0, column=1, padx=10, sticky=tk.E)
 
-    # Filter Dialog DOB Month
+    # Filter Dialogue DOB Month
     month_var = tk.StringVar()
-    filter_month_input = DialogInput(
+    filter_month_input = DialogueInput(
         filter_dob_frame, width=2, textvariable=month_var)
     filter_month_input.grid(row=0, column=2, padx=10, sticky=tk.E)
 
-    # Filter Dialog  DOB Year
+    # Filter Dialogue  DOB Year
     year_var = tk.StringVar()
-    filter_year_input = DialogInput(
+    filter_year_input = DialogueInput(
         filter_dob_frame, width=2, textvariable=year_var)
     filter_year_input.grid(row=0, column=3, padx=10, sticky=tk.E)
 
-    # Filter Dialog Subject Container
+    # Filter Dialogue Subject Container
     filter_subject_frame = tk.Frame(
         filter_body_frame, background=PRIMARY_BG)
     filter_subject_frame.grid(row=3, column=0)
 
     check_vars = list(map(lambda x: tk.IntVar(), range(10)))
-    # Filter Dialog Subjects
+    # Filter Dialogue Subjects
     for index, prop in enumerate(SUBJECTS):
         subject = SUBJECTS[prop]
         txt = f"{subject} [{prop}]"
@@ -548,10 +567,10 @@ def renderFilterDialog():
             activebackground=PRIMARY_BG)
         filter_subj_btn.grid(row=index, column=1, sticky=tk.E)
 
-    # Filter Dialog Submit Button
+    # Filter Dialogue Submit Button
     filter_by_values = [f_name_var, l_name_var,
                         day_var, month_var, year_var, check_vars]
-    filter_submit_btn = DialogButton(
+    filter_submit_btn = DialogueButton(
         filter_body_frame,
         text="Filter",
         command=lambda: submitFilter(filter_by_values, filter_frame))
@@ -559,8 +578,8 @@ def renderFilterDialog():
 
 
 # ---------------------------- Sort Method Function ---------------------------
-def sortMethod(method, dialog):
-    global students
+def sortMethod(method, dialogue):
+    global students # mutate global
     if method == "f_name" or method == "l_name":
         state["sortedby"] = method
         state["sort_asc"] = True
@@ -576,13 +595,13 @@ def sortMethod(method, dialog):
     state["update"].append("footer")
     state["selected"] = []
 
-    dialog.destroy()
+    dialogue.destroy()
 
 
-# ------------------------------ Sort Dialog Box ------------------------------
-def renderSortDialog():
+# ------------------------------ Sort Dialogue Box ------------------------------
+def renderSortDialogue():
     global sort_frame
-    # Sort Dialog Frame
+    # Sort Dialogue Frame
     sort_frame = tk.Frame(window, width=400, background=PRIMARY_BG)
     sort_frame.place(bordermode=tk.INSIDE, x=150, y=138)
     sort_frame.propagate(False)
@@ -593,7 +612,7 @@ def renderSortDialog():
     sort_header.grid_columnconfigure(0, minsize=400)
 
     # Sort Header Label
-    sort_header_label = DialogLabel(
+    sort_header_label = DialogueLabel(
         sort_header, text="Sort Students by")
     sort_header_label.grid(row=0, column=0, sticky=tk.NSEW)
 
@@ -612,7 +631,7 @@ def renderSortDialog():
     sort_options_frame.grid(row=1, column=0)
 
     # Sort by First Name Button
-    sort_all_btn = DialogButton(
+    sort_all_btn = DialogueButton(
         sort_options_frame,
         text="First Name",
         width=14,
@@ -620,7 +639,7 @@ def renderSortDialog():
     sort_all_btn.grid(row=0, column=0, padx=5)
 
     # Sort by Last Name Button
-    desort_all_btn = DialogButton(
+    desort_all_btn = DialogueButton(
         sort_options_frame,
         text="Last Name",
         width=14,
@@ -628,7 +647,7 @@ def renderSortDialog():
     desort_all_btn.grid(row=0, column=1, padx=5)
 
     # Reverse Sort Button
-    sort_inverse_btn = DialogButton(
+    sort_inverse_btn = DialogueButton(
         sort_options_frame,
         text="Reverse",
         width=14,
@@ -654,12 +673,12 @@ def selectionMethod(method):
     state["update"].append("footer")
 
 
-# ---------------------------- Selection Dialog Box ---------------------------
+# ---------------------------- Selection Dialogue Box ---------------------------
 
 
-def renderSelectionDialog():
+def renderSelectionDialogue():
     global selection_frame
-    # Select Dialog Frame
+    # Select Dialogue Frame
     selection_frame = tk.Frame(window, width=400, background=PRIMARY_BG)
     selection_frame.place(bordermode=tk.INSIDE, x=150, y=167)
     selection_frame.propagate(False)
@@ -670,7 +689,7 @@ def renderSelectionDialog():
     selection_header.grid_columnconfigure(0, minsize=400)
 
     # Select Header Label
-    selection_header_label = DialogLabel(
+    selection_header_label = DialogueLabel(
         selection_header, text="Manage Selection")
     selection_header_label.grid(row=0, column=0, sticky=tk.NSEW)
 
@@ -689,7 +708,7 @@ def renderSelectionDialog():
     selection_options_frame.grid(row=1, column=0)
 
     # Select All Button
-    select_all_btn = DialogButton(
+    select_all_btn = DialogueButton(
         selection_options_frame,
         text="Select All",
         width=14,
@@ -697,7 +716,7 @@ def renderSelectionDialog():
     select_all_btn.grid(row=0, column=0, padx=5)
 
     # Deselect All Button
-    deselect_all_btn = DialogButton(
+    deselect_all_btn = DialogueButton(
         selection_options_frame,
         text="Deselect All",
         width=14,
@@ -705,7 +724,7 @@ def renderSelectionDialog():
     deselect_all_btn.grid(row=0, column=1, padx=5)
 
     # Inverse Selection Button
-    select_inverse_btn = DialogButton(
+    select_inverse_btn = DialogueButton(
         selection_options_frame,
         text="Inverse Selection",
         width=14,
@@ -713,10 +732,19 @@ def renderSelectionDialog():
     select_inverse_btn.grid(row=0, column=2, padx=5)
 
 
-# -------------------------- Submit New Student Function -------------------------
-def submitStudent(student_inputs, check_btn_flags, dialog, method, selected_index):
-    global students
-    print(check_btn_flags)
+# ---------------------------- Submit Student Function ---------------------------
+# -  Parameters:                                                                 -
+# -  student_inputs  : input field values from dialogueue                          -
+# -  check_btn_flags : subject checkbox values                                   -
+# -  dialogue          : dialogueue frame passed for closing after function executed -
+# -  method          : function is reused. Accepts "new" or "modify"             -
+# -  selected_index  : in "modify" clause it selects the student                 -
+# -  Return value    : void                                                      -
+# --------------------------------------------------------------------------------
+
+def submitStudent(student_inputs, check_btn_flags, dialogue, method, selected_index):
+    global students # mutate global
+
     # Extract inputs and checkbox values
     [f_name, l_name, phone, email, day, month, year] = map(
         lambda inp: inp.get(), student_inputs)
@@ -787,11 +815,11 @@ def submitStudent(student_inputs, check_btn_flags, dialog, method, selected_inde
     tableIntoCSVFile("students.csv")
     getCSVTable("students.csv")
     reloadTable()
-    dialog.destroy()
+    dialogue.destroy()
 
 
-# -------------------------------- New Dialog Box --------------------------------
-def renderNewDialog(method):
+# -------------------------------- New Dialogue Box --------------------------------
+def renderNewDialogue(method):
     global new_frame
 
     if (method == "modify"):
@@ -805,14 +833,14 @@ def renderNewDialog(method):
                                 "You have too many items selected!")
             return
 
-    # New Dialog Container
+    # New Dialogue Container
     new_frame = tk.Frame(
         window,
         width=400,
         background=PRIMARY_BG)
     new_frame.place(bordermode=tk.INSIDE, x=150, y=0)
 
-    # New Dialog Header
+    # New Dialogue Header
     new_header_frame = tk.Frame(
         new_frame, background=PRIMARY_BG)
     new_header_frame.grid(row=0, column=0)
@@ -820,21 +848,21 @@ def renderNewDialog(method):
 
     header_text = "Create " if method == "new" else "Modify "
 
-    new_header_label = DialogLabel(
+    new_header_label = DialogueLabel(
         new_header_frame, text=f"{header_text} Student Record")
     new_header_label.grid(row=0, column=0)
 
-    # New Dialog Close Button
+    # New Dialogue Close Button
     new_close_btn = CloseButton(
         new_header_frame, command=lambda: new_frame.destroy())
     new_close_btn.grid(row=0, column=1, sticky=tk.E)
 
-    # New Dialog Separator 1
+    # New Dialogue Separator 1
     new_separator_1 = tk.Frame(new_header_frame, bg="#444", height=1)
     new_separator_1.grid(row=1, column=0, sticky=tk.EW,
                          columnspan=2, pady=(0, 2))
 
-    # New Dialog Body
+    # New Dialogue Body
     new_body = tk.Frame(new_frame, background=PRIMARY_BG)
     new_body.grid(row=1, column=0)
     new_body.grid_columnconfigure(0, minsize=200)
@@ -852,140 +880,140 @@ def renderNewDialog(method):
     new_body.grid_rowconfigure(13, minsize=30)
     new_body.grid_rowconfigure(15, minsize=30)
 
-    # New Dialog First Name Label
-    new_f_name_label = DialogLabel(
+    # New Dialogue First Name Label
+    new_f_name_label = DialogueLabel(
         new_body, text="First Name")
     new_f_name_label.grid(row=-0, column=0, sticky=tk.W)
 
-    # New Dialog First Name Input
+    # New Dialogue First Name Input
     f_name_var = tk.StringVar()
-    new_f_name_input = DialogInput(new_body, textvariable=f_name_var)
+    new_f_name_input = DialogueInput(new_body, textvariable=f_name_var)
     new_f_name_input.grid(row=0, column=1, sticky=tk.EW, padx=(0, 4))
 
-    # New Dialog Last Name Label
-    new_l_name_label = DialogLabel(
+    # New Dialogue Last Name Label
+    new_l_name_label = DialogueLabel(
         new_body, text="Last Name")
     new_l_name_label.grid(row=1, column=0, sticky=tk.W)
 
-    # New Dialog Last Name Input
+    # New Dialogue Last Name Input
     l_name_var = tk.StringVar()
-    new_l_name_input = DialogInput(new_body, textvariable=l_name_var)
+    new_l_name_input = DialogueInput(new_body, textvariable=l_name_var)
     new_l_name_input.grid(row=1, column=1, sticky=tk.EW, padx=(0, 4))
 
-    # New Dialog Separator 2
+    # New Dialogue Separator 2
     new_separator_2 = tk.Frame(new_body, bg="#444", height=1)
     new_separator_2.grid(row=2, column=0, sticky=tk.EW,
                          columnspan=2, pady=2)
 
-    # New Dialog Phone Number Label
-    new_phone_label = DialogLabel(
+    # New Dialogue Phone Number Label
+    new_phone_label = DialogueLabel(
         new_body, text="Phone Number")
     new_phone_label.grid(row=3, column=0, sticky=tk.W)
 
-    # New Dialog Phone Number Input
+    # New Dialogue Phone Number Input
     phone_var = tk.StringVar()
-    new_phone_input = DialogInput(new_body, textvariable=phone_var)
+    new_phone_input = DialogueInput(new_body, textvariable=phone_var)
     new_phone_input.grid(row=3, column=1, sticky=tk.EW, padx=(0, 4))
 
-    # New Dialog Email Label
-    new_email_label = DialogLabel(
+    # New Dialogue Email Label
+    new_email_label = DialogueLabel(
         new_body, text="Email")
     new_email_label.grid(row=4, column=0, sticky=tk.W)
 
-    # New Dialog Email Input
+    # New Dialogue Email Input
     email_var = tk.StringVar()
-    new_email_input = DialogInput(new_body, textvariable=email_var)
+    new_email_input = DialogueInput(new_body, textvariable=email_var)
     new_email_input.grid(row=4, column=1, sticky=tk.EW, padx=(0, 4))
 
-    # New Dialog Separator 3
+    # New Dialogue Separator 3
     new_separator_3 = tk.Frame(new_body, bg="#444", height=1)
     new_separator_3.grid(row=5, column=0, sticky=tk.EW,
                          columnspan=2, pady=(2, 4))
 
-    # New Dialog DOB  Label
-    new_dob_label = DialogLabel(
+    # New Dialogue DOB  Label
+    new_dob_label = DialogueLabel(
         new_body, text="Date of Birth")
     new_dob_label.grid(row=6, column=0, sticky=tk.W)
 
-    # New Dialog DOB Input Frame
+    # New Dialogue DOB Input Frame
     new_dob_input_frame = tk.Frame(new_body, background=PRIMARY_BG)
     new_dob_input_frame.grid(row=6, column=1, sticky=tk.E)
     new_dob_input_frame.grid_columnconfigure(0, minsize=67, weight=1)
     new_dob_input_frame.grid_columnconfigure(1, minsize=66, weight=1)
     new_dob_input_frame.grid_columnconfigure(2, minsize=67, weight=1)
 
-    # New Dialog DOB Day Input
+    # New Dialogue DOB Day Input
     day_var = tk.StringVar()
-    new_dob_day_input = DialogInput(
+    new_dob_day_input = DialogueInput(
         new_dob_input_frame, width=2, justify=tk.CENTER, textvariable=day_var)
     new_dob_day_input.grid(row=0, column=0, sticky=tk.EW, padx=(0, 4))
 
-    # New Dialog DOB Month Input
+    # New Dialogue DOB Month Input
     month_var = tk.StringVar()
-    new_dob_month_input = DialogInput(
+    new_dob_month_input = DialogueInput(
         new_dob_input_frame, width=2, justify=tk.CENTER, textvariable=month_var)
     new_dob_month_input.grid(row=0, column=1, sticky=tk.EW, padx=4)
 
-    # New Dialog DOB Year Input
+    # New Dialogue DOB Year Input
     year_var = tk.StringVar()
-    new_dob_year_input = DialogInput(
+    new_dob_year_input = DialogueInput(
         new_dob_input_frame, width=2, justify=tk.CENTER, textvariable=year_var)
     new_dob_year_input.grid(row=0, column=2, sticky=tk.EW, padx=4)
 
-    # New Dialog Separator 4
+    # New Dialogue Separator 4
     new_separator_4 = tk.Frame(new_body, bg="#444", height=1)
     new_separator_4.grid(row=7, column=0, sticky=tk.EW,
                          columnspan=2, pady=(4, 2))
 
-    # New Dialog Subjects Label
-    new_subjects_label = DialogLabel(
+    # New Dialogue Subjects Label
+    new_subjects_label = DialogueLabel(
         new_body, text="Select 4 Subjects")
     new_subjects_label.grid(row=8, column=0, sticky=tk.W)
 
     check_vars = list(map(lambda x: tk.IntVar(), range(10)))
 
-    # New Dialog Subject Row 0 Col 0 SUBJECT 0
+    # New Dialogue Subject Row 0 Col 0 SUBJECT 0
     new_subject_r0_c0 = tk.Frame(new_body, width=200, background=PRIMARY_BG)
     new_subject_r0_c0.grid(row=9, column=0)
     new_subject_r0_c0.grid_columnconfigure(0, minsize=170)
     new_subject_r0_c0.grid_columnconfigure(1, minsize=30)
-    new_subject_0_label = DialogLabel(new_subject_r0_c0, text="[BI] Biology")
+    new_subject_0_label = DialogueLabel(new_subject_r0_c0, text="[BI] Biology")
     new_subject_0_label.grid(row=0, column=0, sticky=tk.W)
     new_subject_0_check = tk.Checkbutton(
         new_subject_r0_c0,  variable=check_vars[0],
         background=PRIMARY_BG, foreground=ACTIVE_FG, activebackground=PRIMARY_BG)
     new_subject_0_check.grid(row=0, column=1, sticky=tk.E)
 
-    # New Dialog Subject Row 0 Col 1 SUBJECT 1
+    # New Dialogue Subject Row 0 Col 1 SUBJECT 1
     new_subject_r0_c1 = tk.Frame(new_body, width=200, background=PRIMARY_BG)
     new_subject_r0_c1.grid(row=9, column=1)
     new_subject_r0_c1.grid_columnconfigure(0, minsize=170)
     new_subject_r0_c1.grid_columnconfigure(1, minsize=30)
-    new_subject_1_label = DialogLabel(new_subject_r0_c1, text="[HI] History")
+    new_subject_1_label = DialogueLabel(new_subject_r0_c1, text="[HI] History")
     new_subject_1_label.grid(row=0, column=0, sticky=tk.W)
     new_subject_1_check = tk.Checkbutton(
         new_subject_r0_c1, variable=check_vars[1],
         background=PRIMARY_BG, foreground=ACTIVE_FG, activebackground=PRIMARY_BG)
     new_subject_1_check.grid(row=0, column=1, sticky=tk.E)
 
-    # New Dialog Subject Row 1 Col 0 SUBJECT 2
+    # New Dialogue Subject Row 1 Col 0 SUBJECT 2
     new_subject_r1_c0 = tk.Frame(new_body, width=200, background=PRIMARY_BG)
     new_subject_r1_c0.grid(row=10, column=0)
     new_subject_r1_c0.grid_columnconfigure(0, minsize=170)
     new_subject_r1_c0.grid_columnconfigure(1, minsize=30)
-    new_subject_2_label = DialogLabel(new_subject_r1_c0, text="[CH] Chemistry")
+    new_subject_2_label = DialogueLabel(new_subject_r1_c0, text="[CH] Chemistry")
     new_subject_2_label.grid(row=0, column=0, sticky=tk.W)
     new_subject_2_check = tk.Checkbutton(
         new_subject_r1_c0, variable=check_vars[2],
         background=PRIMARY_BG, foreground=ACTIVE_FG, activebackground=PRIMARY_BG)
     new_subject_2_check.grid(row=0, column=1, sticky=tk.E)
 
-    # New Dialog Subject Row 1 Col 1 SUBJECT 3
+    # New Dialogue Subject Row 1 Col 1 SUBJECT 3
     new_subject_r1_c1 = tk.Frame(new_body, width=200, background=PRIMARY_BG)
     new_subject_r1_c1.grid(row=10, column=1)
     new_subject_r1_c1.grid_columnconfigure(0, minsize=170)
     new_subject_r1_c1.grid_columnconfigure(1, minsize=30)
-    new_subject_3_label = DialogLabel(
+    new_subject_3_label = DialogueLabel(
         new_subject_r1_c1, text="[IT] Information Techonlogy")
     new_subject_3_label.grid(row=0, column=0, sticky=tk.W)
     new_subject_3_check = tk.Checkbutton(
@@ -993,24 +1021,24 @@ def renderNewDialog(method):
         background=PRIMARY_BG, foreground=ACTIVE_FG, activebackground=PRIMARY_BG)
     new_subject_3_check.grid(row=0, column=1, sticky=tk.E)
 
-    # New Dialog Subject Row 2 Col 0 SUBJECT 4
+    # New Dialogue Subject Row 2 Col 0 SUBJECT 4
     new_subject_r2_c0 = tk.Frame(new_body, width=200, background=PRIMARY_BG)
     new_subject_r2_c0.grid(row=11, column=0)
     new_subject_r2_c0.grid_columnconfigure(0, minsize=170)
     new_subject_r2_c0.grid_columnconfigure(1, minsize=30)
-    new_subject_4_label = DialogLabel(new_subject_r2_c0, text="[EN] English")
+    new_subject_4_label = DialogueLabel(new_subject_r2_c0, text="[EN] English")
     new_subject_4_label.grid(row=0, column=0, sticky=tk.W)
     new_subject_4_check = tk.Checkbutton(
         new_subject_r2_c0, variable=check_vars[4],
         background=PRIMARY_BG, foreground=ACTIVE_FG, activebackground=PRIMARY_BG)
     new_subject_4_check.grid(row=0, column=1, sticky=tk.E)
 
-    # New Dialog Subject Row 2 Col 1 SUBJECT 5
+    # New Dialogue Subject Row 2 Col 1 SUBJECT 5
     new_subject_r2_c1 = tk.Frame(new_body, width=200, background=PRIMARY_BG)
     new_subject_r2_c1.grid(row=11, column=1)
     new_subject_r2_c1.grid_columnconfigure(0, minsize=170)
     new_subject_r2_c1.grid_columnconfigure(1, minsize=30)
-    new_subject_5_label = DialogLabel(
+    new_subject_5_label = DialogueLabel(
         new_subject_r2_c1, text="[MA] Maths")
     new_subject_5_label.grid(row=0, column=0, sticky=tk.W)
     new_subject_5_check = tk.Checkbutton(
@@ -1018,12 +1046,12 @@ def renderNewDialog(method):
         background=PRIMARY_BG, foreground=ACTIVE_FG, activebackground=PRIMARY_BG)
     new_subject_5_check.grid(row=0, column=1, sticky=tk.E)
 
-    # New Dialog Subject Row 3 Col 0 SUBJECT 6
+    # New Dialogue Subject Row 3 Col 0 SUBJECT 6
     new_subject_r3_c0 = tk.Frame(new_body, width=200, background=PRIMARY_BG)
     new_subject_r3_c0.grid(row=12, column=0)
     new_subject_r3_c0.grid_columnconfigure(0, minsize=170)
     new_subject_r3_c0.grid_columnconfigure(1, minsize=30)
-    new_subject_6_label = DialogLabel(
+    new_subject_6_label = DialogueLabel(
         new_subject_r3_c0, text="[FL] Foreign Language")
     new_subject_6_label.grid(row=0, column=0, sticky=tk.W)
     new_subject_6_check = tk.Checkbutton(
@@ -1031,12 +1059,12 @@ def renderNewDialog(method):
         background=PRIMARY_BG, foreground=ACTIVE_FG, activebackground=PRIMARY_BG)
     new_subject_6_check.grid(row=0, column=1, sticky=tk.E)
 
-    # New Dialog Subject Row 3 Col 1 SUBJECT 7
+    # New Dialogue Subject Row 3 Col 1 SUBJECT 7
     new_subject_r3_c1 = tk.Frame(new_body, width=200, background=PRIMARY_BG)
     new_subject_r3_c1.grid(row=12, column=1)
     new_subject_r3_c1.grid_columnconfigure(0, minsize=170)
     new_subject_r3_c1.grid_columnconfigure(1, minsize=30)
-    new_subject_7_label = DialogLabel(
+    new_subject_7_label = DialogueLabel(
         new_subject_r3_c1, text="[PH] Physics")
     new_subject_7_label.grid(row=0, column=0, sticky=tk.W)
     new_subject_7_check = tk.Checkbutton(
@@ -1044,12 +1072,12 @@ def renderNewDialog(method):
         background=PRIMARY_BG, foreground=ACTIVE_FG, activebackground=PRIMARY_BG)
     new_subject_7_check.grid(row=0, column=1, sticky=tk.E)
 
-    # New Dialog Subject Row 3 Col 0 SUBJECT 8
+    # New Dialogue Subject Row 3 Col 0 SUBJECT 8
     new_subject_r4_c0 = tk.Frame(new_body, width=200, background=PRIMARY_BG)
     new_subject_r4_c0.grid(row=13, column=0)
     new_subject_r4_c0.grid_columnconfigure(0, minsize=170)
     new_subject_r4_c0.grid_columnconfigure(1, minsize=30)
-    new_subject_8_label = DialogLabel(
+    new_subject_8_label = DialogueLabel(
         new_subject_r4_c0, text="[GE] Geography")
     new_subject_8_label.grid(row=0, column=0, sticky=tk.W)
     new_subject_8_check = tk.Checkbutton(
@@ -1057,12 +1085,12 @@ def renderNewDialog(method):
         background=PRIMARY_BG, foreground=ACTIVE_FG, activebackground=PRIMARY_BG)
     new_subject_8_check.grid(row=0, column=1, sticky=tk.E)
 
-    # New Dialog Subject Row 3 Col 1 SUBJECT 9
+    # New Dialogue Subject Row 3 Col 1 SUBJECT 9
     new_subject_r4_c1 = tk.Frame(new_body, width=200, background=PRIMARY_BG)
     new_subject_r4_c1.grid(row=13, column=1)
     new_subject_r4_c1.grid_columnconfigure(0, minsize=170)
     new_subject_r4_c1.grid_columnconfigure(1, minsize=30)
-    new_subject_9_label = DialogLabel(
+    new_subject_9_label = DialogueLabel(
         new_subject_r4_c1, text="[PR] Programming")
     new_subject_9_label.grid(row=0, column=0, sticky=tk.W)
     new_subject_9_check = tk.Checkbutton(
@@ -1070,13 +1098,13 @@ def renderNewDialog(method):
         background=PRIMARY_BG, foreground=ACTIVE_FG, activebackground=PRIMARY_BG)
     new_subject_9_check.grid(row=0, column=1, sticky=tk.E)
 
-    # New Dialog Separator 5
+    # New Dialogue Separator 5
     new_separator_4 = tk.Frame(new_body, bg="#444", height=1)
     new_separator_4.grid(row=14, column=0, sticky=tk.EW,
                          columnspan=2, pady=(4, 2))
 
-    # New Dialog Submit Button
-    new_dialog_vars = [f_name_var, l_name_var, phone_var,
+    # New Dialogue Submit Button
+    new_dialogue_vars = [f_name_var, l_name_var, phone_var,
                        email_var, day_var, month_var, year_var]
 
     # We need to pass state[selected] as an argument for submitStudent function
@@ -1089,13 +1117,13 @@ def renderNewDialog(method):
         except IndexError:
             return None
 
-    new_submit = DialogButton(
+    new_submit = DialogueButton(
         new_body, text="Submit", width=10,
         command=lambda: submitStudent(
-            new_dialog_vars, check_vars, new_frame, method, getSelected()))
+            new_dialogue_vars, check_vars, new_frame, method, getSelected()))
     new_submit.grid(row=15, column=0, columnspan=2)
 
-    # New Dialog Separator 6
+    # New Dialogue Separator 6
     new_separator_4 = tk.Frame(new_body, bg="#444", height=1)
     new_separator_4.grid(row=16, column=0, sticky=tk.EW,
                          columnspan=2, pady=(4, 2))
@@ -1151,7 +1179,7 @@ def renderNewDialog(method):
 
 
 def renderDeleteMsg():
-    global students
+    global students # mutate global
 
     if not len(state["selected"]):
         tk.messagebox.showinfo(
@@ -1178,26 +1206,26 @@ def renderDeleteMsg():
             reloadTable()
 
 
-def createDialog(dialog_name):
-    if dialog_name == "Search":
-        renderSearchDialog()
+def createDialogue(dialogue_name):
+    if dialogue_name == "Search":
+        renderSearchDialogue()
 
-    if dialog_name == "Filter":
-        renderFilterDialog()
+    if dialogue_name == "Filter":
+        renderFilterDialogue()
 
-    if dialog_name == "Selection":
-        renderSelectionDialog()
+    if dialogue_name == "Selection":
+        renderSelectionDialogue()
 
-    if dialog_name == "Sort":
-        renderSortDialog()
+    if dialogue_name == "Sort":
+        renderSortDialogue()
 
-    if dialog_name == "New":
-        renderNewDialog("new")
+    if dialogue_name == "New":
+        renderNewDialogue("new")
 
-    if dialog_name == "Modify":
-        renderNewDialog("modify")  # Reuse renderNewDialog function
+    if dialogue_name == "Modify":
+        renderNewDialogue("modify")  # Reuse renderNewDialogue function
 
-    if dialog_name == "Delete":
+    if dialogue_name == "Delete":
         renderDeleteMsg()
 
     state["menu_open"] = None  # ---- Reset state so listener does not re-paint
@@ -1241,7 +1269,7 @@ for index, btn_name in enumerate(BUTTONS[:-1]):
     btn = MainButton(
         sidebar,
         text=btn_name,
-        command=lambda new_state=btn_name: setDialog(new_state))
+        command=lambda new_state=btn_name: setDialogue(new_state))
     btn.grid(row=index, column=0)
 
 # -------------------------------- Exit Button ---------------------------------
@@ -1354,8 +1382,14 @@ def createTable(table_container):
                 subs_abbr = [sub_s[i: i + 2] for i in range(0, len(sub_s), 2)]
 
                 # Assign string from abbriviation
-                decor = "\n" + (" " * 16) + u"\u2022 "
-                subs = list(map(lambda s: decor + SUBJECTS[s], subs_abbr))
+                def concat_txt(abbriviation):
+                    list_decor = u"\u2022 "       # list-bullet
+                    indent = "\n" + (" " * 16)    # whitespace
+                    before = indent + list_decor
+                    return before + SUBJECTS[abbriviation]
+
+                # Subject List
+                subs = list(map(lambda abbr: concat_txt(abbr), subs_abbr))
                 sub_text = "".join(subs)
 
                 details = f"{f_name}\n{l_name}\n{dob}\n{phone}\n{email}\nSubjects      :{sub_text}"
@@ -1476,7 +1510,7 @@ def createFooter(footer_container):
     sort_label.propagate(False)
 
     if state["sortedby"]:
-        sort_clear_btn = DialogButton(
+        sort_clear_btn = DialogueButton(
             sort_items, text="Clear Sorting",
             command=reloadTable)
         sort_clear_btn.grid(row=0, column=1)
@@ -1504,7 +1538,7 @@ def createFooter(footer_container):
     filter_label.propagate(False)
 
     if state["filtered"]:
-        filter_clear_btn = DialogButton(
+        filter_clear_btn = DialogueButton(
             filter_items, text="Clear Filter",
             command=reloadTable)
         filter_clear_btn.grid(row=0, column=1)
@@ -1530,7 +1564,6 @@ def createFooter(footer_container):
 
 # ----------------------------- Pagination Info ---------------------------------
 
-
     def paginate(direction):
         if direction == "+" and state["curr_page"] < state["total_pages"]:
             state["curr_page"] = state["curr_page"] + 1
@@ -1553,7 +1586,7 @@ def createFooter(footer_container):
         pagination_frame, text="Page: ", width=5, background=PRIMARY_BG, foreground=PRIMARY_FG)
     pagination_label1.grid(row=0, column=0)
 
-    pagination_backwards_btn = DialogButton(
+    pagination_backwards_btn = DialogueButton(
         pagination_frame, text="<", width=2, command=lambda: paginate("-"))
     pagination_backwards_btn.grid(row=0, column=1)
 
@@ -1561,7 +1594,7 @@ def createFooter(footer_container):
         pagination_frame, text=state["curr_page"], width=3, background=PRIMARY_BG, foreground=ACTIVE_FG)
     pagination_label2.grid(row=0, column=2)
 
-    pagination_forward_btn = DialogButton(
+    pagination_forward_btn = DialogueButton(
         pagination_frame, text=">", width=2, command=lambda: paginate("+"))
     pagination_forward_btn.grid(row=0, column=3)
 
@@ -1576,7 +1609,7 @@ createFooter(footer_container)
 
 
 def listeningState():
-    # close open dialogs
+    # close open dialogues
 
     if "table" in state["update"]:
         state["update"].remove("table")
@@ -1592,13 +1625,13 @@ def listeningState():
         createFooter(updated_footer_containter)
 
     if (state["menu_open"]):
-        dialogs = [new_frame, modify_frame, delete_frame,
+        dialogues = [new_frame, modify_frame, delete_frame,
                    filter_frame, search_frame, sort_frame, selection_frame]
-        for dialog in dialogs:
-            if dialog:
-                dialog.destroy()
+        for dialogue in dialogues:
+            if dialogue:
+                dialogue.destroy()
 
-        createDialog(state["menu_open"])
+        createDialogue(state["menu_open"])
 
     window.after(100, listeningState)
 
@@ -1606,7 +1639,7 @@ def listeningState():
 listeningState()
 
 
-def setDialog(new_state):
+def setDialogue(new_state):
     state["menu_open"] = new_state
     state["update"].append("table")
 
