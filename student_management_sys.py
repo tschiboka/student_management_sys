@@ -1,9 +1,5 @@
 # ------------------------- Student Management system --------------------------
 # -                        Developed by: Tivadar Debnar                        -
-# -                                                                            -
-# -         Implementing Event driven paradigm; by listening app state.        -
-# -           Function Paradigm: events calling main functionalities           -
-# -             Object Oriented Paradigm: creating MainButton class            -
 # ------------------------------------------------------------------------------
 
 
@@ -20,7 +16,7 @@ import tkinter as tk
 from tkinter import messagebox
 
 
-# ---------------------------- Get Students From CSV ---------------------------
+# ---------------------------- Get Students From CSV --------------------------
 
 
 def getCSVTable(path):
@@ -42,7 +38,7 @@ students = getCSVTable("students.csv")
 
 
 def reloadTable():
-    global students # mutate global
+    global students  # mutate global
     students = getCSVTable("students.csv")
     state["update"].append("table")
     state["update"].append("footer")
@@ -63,7 +59,7 @@ def tableIntoCSVFile(path):
 
 
 # ---------------------------------- App State ---------------------------------
-# -       menu_open: the currently opened dialogue eg: menu_open = "Search"      -
+# -       menu_open: the currently opened dialogue eg: menu_open = "Search"    -
 # -        update: elements that needs rerendering eg: update = ["list"]       -
 # ------------------------------------------------------------------------------
 
@@ -262,17 +258,18 @@ class DialogueLabel(tk.Label):
 # ------------------------------------------------------------------------------
 
 def submit_search(prop, value, dialogue):
-    global students # mutate global
+    global students  # mutate global
     input_value = value.get()
 
     student_index = None
 
     for index, student_row in enumerate(students):
-        if str.upper(student_row[prop]) == str.upper(input_value): # case insensitive search
+        # case insensitive search
+        if str.upper(student_row[prop]) == str.upper(input_value):
             student_index = index
 
     if student_index != None:
-        jump_to_page = student_index // 20 # page jumps to the selected row
+        jump_to_page = student_index // 20  # page jumps to the selected row
         state["curr_page"] = jump_to_page + 1
     else:
         messagebox.showinfo("Error", f"No Students with name\n{input_value}")
@@ -358,18 +355,17 @@ def submitFilter(filter_by_values, dialogue):
     month = filter_by_values[3].get()
     year = filter_by_values[4].get()
 
-
     # Extract respective subject abbriviation by index
+
     def getSubjects(i, val):
         abbrs = ["BI", "CH", "EN", "FL", "GE", "HI", "IT", "MA", "PH", "PR"]
         if val:
             return abbrs[i]
 
-
     subjects_inp = list(
         map(lambda el: el.get(), filter_by_values[5])
     )
-    
+
     subjects = list(map(lambda x: getSubjects(
         x[0], x[1]), enumerate(subjects_inp)))
     subjects = list(filter(lambda x: x, subjects))
@@ -418,7 +414,7 @@ def submitFilter(filter_by_values, dialogue):
                 return True
         return False
 
-    global students # mutate global
+    global students  # mutate global
     oldlength = len(students)
     filtered_students = list(filter(filter_function, students))
 
@@ -434,152 +430,436 @@ def submitFilter(filter_by_values, dialogue):
         messagebox.showinfo(
             "Warning", "Filtering has no result!")
 
+
 # ----------------------------- Filter Dialogue Box -----------------------------
 
 
 def renderFilterDialogue():
     global filter_frame
+
     # Filter Dialogue Container
     filter_frame = tk.Frame(
         window,
         width=400,
         background=PRIMARY_BG)
     filter_frame.place(bordermode=tk.INSIDE, x=150, y=0)
-    filter_frame.grid_columnconfigure(0, minsize=400)
 
     # Filter Dialogue Header
     filter_header_frame = tk.Frame(
         filter_frame, background=PRIMARY_BG)
     filter_header_frame.grid(row=0, column=0)
+    filter_header_frame.grid_columnconfigure(0, minsize=370)
 
     filter_header_label = DialogueLabel(
-        filter_header_frame, text="Filter students by")
-    filter_header_label.grid(row=0, column=0, padx=10)
+        filter_header_frame, text="Filter Student Record By")
+    filter_header_label.grid(row=0, column=0)
 
     # Filter Dialogue Close Button
     filter_close_btn = CloseButton(
-        filter_frame, command=lambda: filter_frame.destroy())
-    filter_close_btn.grid(row=0, column=1)
+        filter_header_frame, command=lambda: filter_frame.destroy())
+    filter_close_btn.grid(row=0, column=1, sticky=tk.E)
+
+    # Filter Dialogue Separator 1
+    filter_separator_1 = tk.Frame(filter_header_frame, bg="#444", height=1)
+    filter_separator_1.grid(row=1, column=0, sticky=tk.EW,
+                            columnspan=2, pady=(0, 2))
 
     # Filter Dialogue Body
-    filter_body_frame = tk.Frame(filter_frame, background=PRIMARY_BG)
-    filter_body_frame.grid(row=1, column=0, sticky=tk.NSEW)
-    filter_body_frame.grid_columnconfigure(0, minsize=400)
+    filter_body = tk.Frame(filter_frame, background=PRIMARY_BG)
+    filter_body.grid(row=1, column=0)
+    filter_body.grid_columnconfigure(0, minsize=200)
+    filter_body.grid_columnconfigure(1, minsize=200)
+    filter_body.grid_rowconfigure(0, minsize=30)
+    filter_body.grid_rowconfigure(1, minsize=30)
+    filter_body.grid_rowconfigure(3, minsize=30)
+    filter_body.grid_rowconfigure(5, minsize=30)
+    filter_body.grid_rowconfigure(6, minsize=30)
+    filter_body.grid_rowconfigure(7, minsize=30)
+    filter_body.grid_rowconfigure(8, minsize=30)
+    filter_body.grid_rowconfigure(9, minsize=30)
+    filter_body.grid_rowconfigure(10, minsize=30)
+    filter_body.grid_rowconfigure(12, minsize=30)
 
-    # Filter Dialogue First Name
-    filter_f_name_frame = tk.Frame(
-        filter_body_frame, background=PRIMARY_BG)
-    filter_f_name_frame.grid(row=0, column=0)
+    # Filter Dialogue First Name Label
+    filter_f_name_label = DialogueLabel(
+        filter_body, text="First Name")
+    filter_f_name_label.grid(row=-0, column=0, sticky=tk.W)
 
-    filter_f_name_label = tk.Label(
-        filter_f_name_frame,
-        text="First Name",
-        background=PRIMARY_BG,
-        foreground=PRIMARY_FG,
-        width=28,
-        justify=tk.LEFT,
-        anchor=tk.W)
-    filter_f_name_label.grid(row=0, column=0, sticky=tk.W)
-
+    # Filter Dialogue First Name Input
     f_name_var = tk.StringVar()
-    filter_f_name_input = DialogueInput(
-        filter_f_name_frame, width=20, textvariable=f_name_var)
-    filter_f_name_input.grid(row=0, column=1, pady=2)
+    filter_f_name_input = DialogueInput(filter_body, textvariable=f_name_var)
+    filter_f_name_input.grid(row=0, column=1, sticky=tk.EW, padx=(0, 4))
 
-    # Filter Dialogue Last Name
-    filter_l_name_frame = tk.Frame(
-        filter_body_frame, background=PRIMARY_BG)
-    filter_l_name_frame.grid(row=1, column=0)
+    # Filter Dialogue Last Name Label
+    filter_l_name_label = DialogueLabel(
+        filter_body, text="Last Name")
+    filter_l_name_label.grid(row=1, column=0, sticky=tk.W)
 
-    filter_l_name_label = tk.Label(
-        filter_l_name_frame,
-        text="Last Name",
-        background=PRIMARY_BG,
-        foreground=PRIMARY_FG,
-        width=28,
-        justify=tk.LEFT,
-        anchor=tk.W)
-    filter_l_name_label.grid(row=0, column=0)
-
+    # Filter Dialogue Last Name Input
     l_name_var = tk.StringVar()
-    filter_l_name_input = DialogueInput(
-        filter_l_name_frame, width=20, textvariable=l_name_var)
-    filter_l_name_input.grid(row=0, column=1)
+    filter_l_name_input = DialogueInput(filter_body, textvariable=l_name_var)
+    filter_l_name_input.grid(row=1, column=1, sticky=tk.EW, padx=(0, 4))
 
-    # Filter Dialogue Date of Birth
-    filter_dob_frame = tk.Frame(
-        filter_body_frame, background=PRIMARY_BG)
-    filter_dob_frame.grid(row=2, column=0)
+    # Filter Dialogue Separator 2
+    filter_separator_2 = tk.Frame(filter_body, bg="#444", height=1)
+    filter_separator_2.grid(row=2, column=0, sticky=tk.EW,
+                            columnspan=2, pady=2)
 
-    filter_dob_label = tk.Label(
-        filter_dob_frame,
-        text="Date of Birth [dd,mm,yy]",
-        background=PRIMARY_BG,
-        foreground=PRIMARY_FG,
-        width=28,
-        justify=tk.LEFT,
-        anchor=tk.W)
-    filter_dob_label.grid(row=0, column=0, pady=2)
+    # Filter Dialogue DOB  Label
+    filter_dob_label = DialogueLabel(
+        filter_body, text="Date of Birth")
+    filter_dob_label.grid(row=3, column=0, sticky=tk.W)
 
-    # Filter Dialogue DOB Day
+    # Filter Dialogue DOB Input Frame
+    filter_dob_input_frame = tk.Frame(filter_body, background=PRIMARY_BG)
+    filter_dob_input_frame.grid(row=3, column=1, sticky=tk.E)
+    filter_dob_input_frame.grid_columnconfigure(0, minsize=67, weight=1)
+    filter_dob_input_frame.grid_columnconfigure(1, minsize=66, weight=1)
+    filter_dob_input_frame.grid_columnconfigure(2, minsize=67, weight=1)
+
+    # Filter Dialogue DOB Day Input
     day_var = tk.StringVar()
-    filter_day_input = DialogueInput(
-        filter_dob_frame, width=2, textvariable=day_var)
-    filter_day_input.grid(row=0, column=1, padx=10, sticky=tk.E)
+    filter_dob_day_input = DialogueInput(
+        filter_dob_input_frame, width=2, justify=tk.CENTER, textvariable=day_var)
+    filter_dob_day_input.grid(row=0, column=0, sticky=tk.EW, padx=(0, 4))
 
-    # Filter Dialogue DOB Month
+    # Filter Dialogue DOB Month Input
     month_var = tk.StringVar()
-    filter_month_input = DialogueInput(
-        filter_dob_frame, width=2, textvariable=month_var)
-    filter_month_input.grid(row=0, column=2, padx=10, sticky=tk.E)
+    filter_dob_month_input = DialogueInput(
+        filter_dob_input_frame, width=2, justify=tk.CENTER, textvariable=month_var)
+    filter_dob_month_input.grid(row=0, column=1, sticky=tk.EW, padx=4)
 
-    # Filter Dialogue  DOB Year
+    # Filter Dialogue DOB Year Input
     year_var = tk.StringVar()
-    filter_year_input = DialogueInput(
-        filter_dob_frame, width=2, textvariable=year_var)
-    filter_year_input.grid(row=0, column=3, padx=10, sticky=tk.E)
+    filter_dob_year_input = DialogueInput(
+        filter_dob_input_frame, width=2, justify=tk.CENTER, textvariable=year_var)
+    filter_dob_year_input.grid(row=0, column=2, sticky=tk.EW, padx=4)
 
-    # Filter Dialogue Subject Container
-    filter_subject_frame = tk.Frame(
-        filter_body_frame, background=PRIMARY_BG)
-    filter_subject_frame.grid(row=3, column=0)
+    # Filter Dialogue Separator 4
+    filter_separator_4 = tk.Frame(filter_body, bg="#444", height=1)
+    filter_separator_4.grid(row=4, column=0, sticky=tk.EW,
+                            columnspan=2, pady=(4, 2))
+
+    # Filter Dialogue Subjects Label
+    filter_subjects_label = DialogueLabel(
+        filter_body, text="Select 4 Subjects")
+    filter_subjects_label.grid(row=5, column=0, sticky=tk.W)
 
     check_vars = list(map(lambda x: tk.IntVar(), range(10)))
-    # Filter Dialogue Subjects
-    for index, prop in enumerate(SUBJECTS):
-        subject = SUBJECTS[prop]
-        txt = f"{subject} [{prop}]"
-        filter_subj_label = tk.Label(
-            filter_subject_frame,
-            text=txt,
-            background=PRIMARY_BG,
-            foreground=PRIMARY_FG,
-            width=50,
-            justify=tk.LEFT,
-            anchor=tk.W)
-        filter_subj_label.grid(row=index, column=0, sticky=tk.W)
 
-        filter_subj_btn = tk.Checkbutton(
-            filter_subject_frame,
-            variable=check_vars[index],
-            background=PRIMARY_BG,
-            foreground=ACTIVE_FG,
-            activebackground=PRIMARY_BG)
-        filter_subj_btn.grid(row=index, column=1, sticky=tk.E)
+    # Filter Dialogue Subject Row 0 Col 0 SUBJECT 0
+    filter_subject_r0_c0 = tk.Frame(
+        filter_body, width=200, background=PRIMARY_BG)
+    filter_subject_r0_c0.grid(row=6, column=0)
+    filter_subject_r0_c0.grid_columnconfigure(0, minsize=170)
+    filter_subject_r0_c0.grid_columnconfigure(1, minsize=30)
+    filter_subject_0_label = DialogueLabel(
+        filter_subject_r0_c0, text="[BI] Biology")
+    filter_subject_0_label.grid(row=0, column=0, sticky=tk.W)
+    filter_subject_0_check = tk.Checkbutton(
+        filter_subject_r0_c0,  variable=check_vars[0],
+        background=PRIMARY_BG, foreground=ACTIVE_FG, activebackground=PRIMARY_BG)
+    filter_subject_0_check.grid(row=0, column=1, sticky=tk.E)
 
-    # Filter Dialogue Submit Button
-    filter_by_values = [f_name_var, l_name_var,
-                        day_var, month_var, year_var, check_vars]
-    filter_submit_btn = DialogueButton(
-        filter_body_frame,
-        text="Filter",
-        command=lambda: submitFilter(filter_by_values, filter_frame))
-    filter_submit_btn.grid(row=4, column=0)
+    # Filter Dialogue Subject Row 0 Col 1 SUBJECT 1
+    filter_subject_r0_c1 = tk.Frame(
+        filter_body, width=200, background=PRIMARY_BG)
+    filter_subject_r0_c1.grid(row=6, column=1)
+    filter_subject_r0_c1.grid_columnconfigure(0, minsize=170)
+    filter_subject_r0_c1.grid_columnconfigure(1, minsize=30)
+    filter_subject_1_label = DialogueLabel(
+        filter_subject_r0_c1, text="[HI] History")
+    filter_subject_1_label.grid(row=0, column=0, sticky=tk.W)
+    filter_subject_1_check = tk.Checkbutton(
+        filter_subject_r0_c1, variable=check_vars[1],
+        background=PRIMARY_BG, foreground=ACTIVE_FG, activebackground=PRIMARY_BG)
+    filter_subject_1_check.grid(row=0, column=1, sticky=tk.E)
+
+    # Filter Dialogue Subject Row 1 Col 0 SUBJECT 2
+    filter_subject_r1_c0 = tk.Frame(
+        filter_body, width=200, background=PRIMARY_BG)
+    filter_subject_r1_c0.grid(row=7, column=0)
+    filter_subject_r1_c0.grid_columnconfigure(0, minsize=170)
+    filter_subject_r1_c0.grid_columnconfigure(1, minsize=30)
+    filter_subject_2_label = DialogueLabel(
+        filter_subject_r1_c0, text="[CH] Chemistry")
+    filter_subject_2_label.grid(row=0, column=0, sticky=tk.W)
+    filter_subject_2_check = tk.Checkbutton(
+        filter_subject_r1_c0, variable=check_vars[2],
+        background=PRIMARY_BG, foreground=ACTIVE_FG, activebackground=PRIMARY_BG)
+    filter_subject_2_check.grid(row=0, column=1, sticky=tk.E)
+
+    # Filter Dialogue Subject Row 1 Col 1 SUBJECT 3
+    filter_subject_r1_c1 = tk.Frame(
+        filter_body, width=200, background=PRIMARY_BG)
+    filter_subject_r1_c1.grid(row=7, column=1)
+    filter_subject_r1_c1.grid_columnconfigure(0, minsize=170)
+    filter_subject_r1_c1.grid_columnconfigure(1, minsize=30)
+    filter_subject_3_label = DialogueLabel(
+        filter_subject_r1_c1, text="[IT] Information Techonlogy")
+    filter_subject_3_label.grid(row=0, column=0, sticky=tk.W)
+    filter_subject_3_check = tk.Checkbutton(
+        filter_subject_r1_c1, variable=check_vars[3],
+        background=PRIMARY_BG, foreground=ACTIVE_FG, activebackground=PRIMARY_BG)
+    filter_subject_3_check.grid(row=0, column=1, sticky=tk.E)
+
+    # Filter Dialogue Subject Row 2 Col 0 SUBJECT 4
+    filter_subject_r2_c0 = tk.Frame(
+        filter_body, width=200, background=PRIMARY_BG)
+    filter_subject_r2_c0.grid(row=8, column=0)
+    filter_subject_r2_c0.grid_columnconfigure(0, minsize=170)
+    filter_subject_r2_c0.grid_columnconfigure(1, minsize=30)
+    filter_subject_4_label = DialogueLabel(
+        filter_subject_r2_c0, text="[EN] English")
+    filter_subject_4_label.grid(row=0, column=0, sticky=tk.W)
+    filter_subject_4_check = tk.Checkbutton(
+        filter_subject_r2_c0, variable=check_vars[4],
+        background=PRIMARY_BG, foreground=ACTIVE_FG, activebackground=PRIMARY_BG)
+    filter_subject_4_check.grid(row=0, column=1, sticky=tk.E)
+
+    # Filter Dialogue Subject Row 2 Col 1 SUBJECT 5
+    filter_subject_r2_c1 = tk.Frame(
+        filter_body, width=200, background=PRIMARY_BG)
+    filter_subject_r2_c1.grid(row=8, column=1)
+    filter_subject_r2_c1.grid_columnconfigure(0, minsize=170)
+    filter_subject_r2_c1.grid_columnconfigure(1, minsize=30)
+    filter_subject_5_label = DialogueLabel(
+        filter_subject_r2_c1, text="[MA] Maths")
+    filter_subject_5_label.grid(row=0, column=0, sticky=tk.W)
+    filter_subject_5_check = tk.Checkbutton(
+        filter_subject_r2_c1, variable=check_vars[5],
+        background=PRIMARY_BG, foreground=ACTIVE_FG, activebackground=PRIMARY_BG)
+    filter_subject_5_check.grid(row=0, column=1, sticky=tk.E)
+
+    # Filter Dialogue Subject Row 3 Col 0 SUBJECT 6
+    filter_subject_r3_c0 = tk.Frame(
+        filter_body, width=200, background=PRIMARY_BG)
+    filter_subject_r3_c0.grid(row=9, column=0)
+    filter_subject_r3_c0.grid_columnconfigure(0, minsize=170)
+    filter_subject_r3_c0.grid_columnconfigure(1, minsize=30)
+    filter_subject_6_label = DialogueLabel(
+        filter_subject_r3_c0, text="[FL] Foreign Language")
+    filter_subject_6_label.grid(row=0, column=0, sticky=tk.W)
+    filter_subject_6_check = tk.Checkbutton(
+        filter_subject_r3_c0, variable=check_vars[6],
+        background=PRIMARY_BG, foreground=ACTIVE_FG, activebackground=PRIMARY_BG)
+    filter_subject_6_check.grid(row=0, column=1, sticky=tk.E)
+
+    # Filter Dialogue Subject Row 3 Col 1 SUBJECT 7
+    filter_subject_r3_c1 = tk.Frame(
+        filter_body, width=200, background=PRIMARY_BG)
+    filter_subject_r3_c1.grid(row=9, column=1)
+    filter_subject_r3_c1.grid_columnconfigure(0, minsize=170)
+    filter_subject_r3_c1.grid_columnconfigure(1, minsize=30)
+    filter_subject_7_label = DialogueLabel(
+        filter_subject_r3_c1, text="[PH] Physics")
+    filter_subject_7_label.grid(row=0, column=0, sticky=tk.W)
+    filter_subject_7_check = tk.Checkbutton(
+        filter_subject_r3_c1, variable=check_vars[7],
+        background=PRIMARY_BG, foreground=ACTIVE_FG, activebackground=PRIMARY_BG)
+    filter_subject_7_check.grid(row=0, column=1, sticky=tk.E)
+
+    # Filter Dialogue Subject Row 3 Col 0 SUBJECT 8
+    filter_subject_r4_c0 = tk.Frame(
+        filter_body, width=200, background=PRIMARY_BG)
+    filter_subject_r4_c0.grid(row=10, column=0)
+    filter_subject_r4_c0.grid_columnconfigure(0, minsize=170)
+    filter_subject_r4_c0.grid_columnconfigure(1, minsize=30)
+    filter_subject_8_label = DialogueLabel(
+        filter_subject_r4_c0, text="[GE] Geography")
+    filter_subject_8_label.grid(row=0, column=0, sticky=tk.W)
+    filter_subject_8_check = tk.Checkbutton(
+        filter_subject_r4_c0, variable=check_vars[8],
+        background=PRIMARY_BG, foreground=ACTIVE_FG, activebackground=PRIMARY_BG)
+    filter_subject_8_check.grid(row=0, column=1, sticky=tk.E)
+
+    # Filter Dialogue Subject Row 3 Col 1 SUBJECT 9
+    filter_subject_r4_c1 = tk.Frame(
+        filter_body, width=200, background=PRIMARY_BG)
+    filter_subject_r4_c1.grid(row=10, column=1)
+    filter_subject_r4_c1.grid_columnconfigure(0, minsize=170)
+    filter_subject_r4_c1.grid_columnconfigure(1, minsize=30)
+    filter_subject_9_label = DialogueLabel(
+        filter_subject_r4_c1, text="[PR] Programming")
+    filter_subject_9_label.grid(row=0, column=0, sticky=tk.W)
+    filter_subject_9_check = tk.Checkbutton(
+        filter_subject_r4_c1, variable=check_vars[9],
+        background=PRIMARY_BG, foreground=ACTIVE_FG, activebackground=PRIMARY_BG)
+    filter_subject_9_check.grid(row=0, column=1, sticky=tk.E)
+
+    # Filter Dialogue Separator 4
+    filter_separator_4 = tk.Frame(filter_body, bg="#444", height=1)
+    filter_separator_4.grid(row=11, column=0, sticky=tk.EW,
+                            columnspan=2, pady=(4, 2))
+
+    filter_dialogue_vars = [
+        f_name_var, l_name_var,
+        day_var, month_var, year_var,
+        check_vars
+    ]
+
+    # Filter Submit Button
+    filter_submit = DialogueButton(
+        filter_body, text="Submit", width=10,
+        command=lambda: submitFilter(
+            filter_dialogue_vars, filter_frame))
+    filter_submit.grid(row=12, column=0, columnspan=2)
+
+    # OOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOLLLLD
+    # OOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOLLLLD
+    # OOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOLLLLD
+    # OOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOLLLLD
+    # OOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOLLLLD
+    # OOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOLLLLD
+    # OOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOLLLLD
+    # OOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOLLLLD
+    # Filter Dialogue Container
+    # filter_frame = tk.Frame(
+    #     window,
+    #     width=400,
+    #     background=PRIMARY_BG)
+    # filter_frame.place(bordermode=tk.INSIDE, x=150, y=0)
+    # filter_frame.grid_columnconfigure(0, minsize=400)
+
+    # # Filter Dialogue Header
+    # filter_header_frame = tk.Frame(
+    #     filter_frame, background=PRIMARY_BG)
+    # filter_header_frame.grid(row=0, column=0)
+
+    # filter_header_label = DialogueLabel(
+    #     filter_header_frame, text="Filter students by")
+    # filter_header_label.grid(row=0, column=0, padx=10)
+
+    # # Filter Dialogue Close Button
+    # filter_close_btn = CloseButton(
+    #     filter_frame, command=lambda: filter_frame.destroy())
+    # filter_close_btn.grid(row=0, column=1)
+
+    # # Filter Dialogue Body
+    # filter_body_frame = tk.Frame(filter_frame, background=PRIMARY_BG)
+    # filter_body_frame.grid(row=1, column=0, sticky=tk.NSEW)
+    # filter_body_frame.grid_columnconfigure(0, minsize=400)
+
+    # # Filter Dialogue First Name
+    # filter_f_name_frame = tk.Frame(
+    #     filter_body_frame, background=PRIMARY_BG)
+    # filter_f_name_frame.grid(row=0, column=0)
+
+    # filter_f_name_label = tk.Label(
+    #     filter_f_name_frame,
+    #     text="First Name",
+    #     background=PRIMARY_BG,
+    #     foreground=PRIMARY_FG,
+    #     width=28,
+    #     justify=tk.LEFT,
+    #     anchor=tk.W)
+    # filter_f_name_label.grid(row=0, column=0, sticky=tk.W)
+
+    # f_name_var = tk.StringVar()
+    # filter_f_name_input = DialogueInput(
+    #     filter_f_name_frame, width=20, textvariable=f_name_var)
+    # filter_f_name_input.grid(row=0, column=1, pady=2)
+
+    # # Filter Dialogue Last Name
+    # filter_l_name_frame = tk.Frame(
+    #     filter_body_frame, background=PRIMARY_BG)
+    # filter_l_name_frame.grid(row=1, column=0)
+
+    # filter_l_name_label = tk.Label(
+    #     filter_l_name_frame,
+    #     text="Last Name",
+    #     background=PRIMARY_BG,
+    #     foreground=PRIMARY_FG,
+    #     width=28,
+    #     justify=tk.LEFT,
+    #     anchor=tk.W)
+    # filter_l_name_label.grid(row=0, column=0)
+
+    # l_name_var = tk.StringVar()
+    # filter_l_name_input = DialogueInput(
+    #     filter_l_name_frame, width=20, textvariable=l_name_var)
+    # filter_l_name_input.grid(row=0, column=1)
+
+    # # Filter Dialogue Date of Birth
+    # filter_dob_frame = tk.Frame(
+    #     filter_body_frame, background=PRIMARY_BG)
+    # filter_dob_frame.grid(row=2, column=0)
+
+    # filter_dob_label = tk.Label(
+    #     filter_dob_frame,
+    #     text="Date of Birth [dd,mm,yy]",
+    #     background=PRIMARY_BG,
+    #     foreground=PRIMARY_FG,
+    #     width=28,
+    #     justify=tk.LEFT,
+    #     anchor=tk.W)
+    # filter_dob_label.grid(row=0, column=0, pady=2)
+
+    # # Filter Dialogue DOB Day
+    # day_var = tk.StringVar()
+    # filter_day_input = DialogueInput(
+    #     filter_dob_frame, width=2, textvariable=day_var)
+    # filter_day_input.grid(row=0, column=1, padx=10, sticky=tk.E)
+
+    # # Filter Dialogue DOB Month
+    # month_var = tk.StringVar()
+    # filter_month_input = DialogueInput(
+    #     filter_dob_frame, width=2, textvariable=month_var)
+    # filter_month_input.grid(row=0, column=2, padx=10, sticky=tk.E)
+
+    # # Filter Dialogue  DOB Year
+    # year_var = tk.StringVar()
+    # filter_year_input = DialogueInput(
+    #     filter_dob_frame, width=2, textvariable=year_var)
+    # filter_year_input.grid(row=0, column=3, padx=10, sticky=tk.E)
+
+    # # Filter Dialogue Subject Container
+    # filter_subject_frame = tk.Frame(
+    #     filter_body_frame, background=PRIMARY_BG)
+    # filter_subject_frame.grid(row=3, column=0)
+
+    # check_vars = list(map(lambda x: tk.IntVar(), range(10)))
+    # # Filter Dialogue Subjects
+    # for index, prop in enumerate(SUBJECTS):
+    #     subject = SUBJECTS[prop]
+    #     txt = f"{subject} [{prop}]"
+    #     filter_subj_label = tk.Label(
+    #         filter_subject_frame,
+    #         text=txt,
+    #         background=PRIMARY_BG,
+    #         foreground=PRIMARY_FG,
+    #         width=50,
+    #         justify=tk.LEFT,
+    #         anchor=tk.W)
+    #     filter_subj_label.grid(row=index, column=0, sticky=tk.W)
+
+    #     filter_subj_btn = tk.Checkbutton(
+    #         filter_subject_frame,
+    #         variable=check_vars[index],
+    #         background=PRIMARY_BG,
+    #         foreground=ACTIVE_FG,
+    #         activebackground=PRIMARY_BG)
+    #     filter_subj_btn.grid(row=index, column=1, sticky=tk.E)
+
+    # # Filter Dialogue Submit Button
+    # filter_by_values = [f_name_var, l_name_var,
+    #                     day_var, month_var, year_var, check_vars]
+    # filter_submit_btn = DialogueButton(
+    #     filter_body_frame,
+    #     text="Filter",
+    #     command=lambda: submitFilter(filter_by_values, filter_frame))
+    # filter_submit_btn.grid(row=4, column=0)
 
 
 # ---------------------------- Sort Method Function ---------------------------
+# -  Parameters:                                                              -
+# -  method: "f_name" | "last_name"                                           -
+# -  dialogue: the sort dialogue in order to close it                         -
+# -  Return: void                                                             -
+# -----------------------------------------------------------------------------
+
 def sortMethod(method, dialogue):
-    global students # mutate global
+    global students  # mutate global
     if method == "f_name" or method == "l_name":
         state["sortedby"] = method
         state["sort_asc"] = True
@@ -656,6 +936,9 @@ def renderSortDialogue():
 
 
 # ---------------------------- Selection Functions ----------------------------
+# -  Parameters:                                                              -
+# -  method: "all" | "none" | "inverse"                                       -
+# -----------------------------------------------------------------------------
 
 
 def selectionMethod(method):
@@ -743,7 +1026,7 @@ def renderSelectionDialogue():
 # --------------------------------------------------------------------------------
 
 def submitStudent(student_inputs, check_btn_flags, dialogue, method, selected_index):
-    global students # mutate global
+    global students  # mutate global
 
     # Extract inputs and checkbox values
     [f_name, l_name, phone, email, day, month, year] = map(
@@ -822,6 +1105,7 @@ def submitStudent(student_inputs, check_btn_flags, dialogue, method, selected_in
 def renderNewDialogue(method):
     global new_frame
 
+    # Validate selection on modify
     if (method == "modify"):
         if not len(state["selected"]):
             messagebox.showinfo(
@@ -1001,7 +1285,8 @@ def renderNewDialogue(method):
     new_subject_r1_c0.grid(row=10, column=0)
     new_subject_r1_c0.grid_columnconfigure(0, minsize=170)
     new_subject_r1_c0.grid_columnconfigure(1, minsize=30)
-    new_subject_2_label = DialogueLabel(new_subject_r1_c0, text="[CH] Chemistry")
+    new_subject_2_label = DialogueLabel(
+        new_subject_r1_c0, text="[CH] Chemistry")
     new_subject_2_label.grid(row=0, column=0, sticky=tk.W)
     new_subject_2_check = tk.Checkbutton(
         new_subject_r1_c0, variable=check_vars[2],
@@ -1105,7 +1390,7 @@ def renderNewDialogue(method):
 
     # New Dialogue Submit Button
     new_dialogue_vars = [f_name_var, l_name_var, phone_var,
-                       email_var, day_var, month_var, year_var]
+                         email_var, day_var, month_var, year_var]
 
     # We need to pass state[selected] as an argument for submitStudent function
     # Because user can select other elements while submitting, consequently
@@ -1179,7 +1464,7 @@ def renderNewDialogue(method):
 
 
 def renderDeleteMsg():
-    global students # mutate global
+    global students  # mutate global
 
     if not len(state["selected"]):
         tk.messagebox.showinfo(
@@ -1564,6 +1849,7 @@ def createFooter(footer_container):
 
 # ----------------------------- Pagination Info ---------------------------------
 
+
     def paginate(direction):
         if direction == "+" and state["curr_page"] < state["total_pages"]:
             state["curr_page"] = state["curr_page"] + 1
@@ -1626,7 +1912,7 @@ def listeningState():
 
     if (state["menu_open"]):
         dialogues = [new_frame, modify_frame, delete_frame,
-                   filter_frame, search_frame, sort_frame, selection_frame]
+                     filter_frame, search_frame, sort_frame, selection_frame]
         for dialogue in dialogues:
             if dialogue:
                 dialogue.destroy()
