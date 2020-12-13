@@ -30,7 +30,7 @@ def generateSubjects():
 
 
 # read json and create custom data
-with open('data.json') as f:
+with open('data_backup.json') as f:
     data = json.load(f)
     DB = []
 

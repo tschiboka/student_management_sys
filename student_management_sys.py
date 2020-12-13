@@ -437,6 +437,16 @@ def submitFilter(filter_by_values, dialogue):
 def renderFilterDialogue():
     global filter_frame
 
+    def createGridLabel(master, text, row, col, row_min=(0, 0), col_min=(0, 0)):
+        label = DialogueLabel(master, text=text).grid(row=row, column=col)
+        print(row_min, col_min)
+        if row_min:
+            master.grid_rowconfigure(row_min[0], minsize=row_min[1])
+        if col_min:
+            master.grid_columnconfigure(col_min[0], minsize=col_min[1])
+
+    labels = ["Filter Student Record By", "First Name"]
+
     # Filter Dialogue Container
     filter_frame = tk.Frame(
         window,
@@ -450,9 +460,7 @@ def renderFilterDialogue():
     filter_header_frame.grid(row=0, column=0)
     filter_header_frame.grid_columnconfigure(0, minsize=370)
 
-    filter_header_label = DialogueLabel(
-        filter_header_frame, text="Filter Student Record By")
-    filter_header_label.grid(row=0, column=0)
+    createGridLabel(filter_frame, labels[0], 0, 0)
 
     # Filter Dialogue Close Button
     filter_close_btn = CloseButton(
@@ -484,6 +492,7 @@ def renderFilterDialogue():
     filter_f_name_label = DialogueLabel(
         filter_body, text="First Name")
     filter_f_name_label.grid(row=-0, column=0, sticky=tk.W)
+    createGridLabel(filter_body, labels[1], 0, (0, 300))
 
     # Filter Dialogue First Name Input
     f_name_var = tk.StringVar()
